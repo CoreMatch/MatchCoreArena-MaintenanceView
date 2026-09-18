@@ -5,29 +5,30 @@ import (
 	"fmt"
 	"log"
 
+	"MCA-Maintenance/internal/config"
 	"MCA-Maintenance/internal/logic"
 	"MCA-Maintenance/internal/models"
 )
 
 // App struct
 type App struct {
-	ctx     context.Context
-	svc     *logic.MaintenanceService
+	ctx context.Context
+	svc *logic.MaintenanceService
+	cfg *models.Config
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	// 默认连接配置，实际可从配置文件加载
-	dsn := "root:@tcp(127.0.0.1:3306)/matchcorearena?parseTime=true"
-	redisAddr := "127.0.0.1:6379"
-	
-	svc, err := logic.NewMaintenanceService(dsn, redisAddr, "", 0)
+	cfg, err := config.LoadConfig("config.yaml")
 	if err != nil {
-		log.Printf("Warning: Failed to connect to services: %v", err)
+		log.Printf("Warning: Failed to load config: %v", err)
 	}
+
+	svc := logic.NewMaintenanceService(cfg)
 
 	return &App{
 		svc: svc,
+		cfg: cfg,
 	}
 }
 
@@ -35,6 +36,11 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// GetConfig 获取当前配置
+func (a *App) GetConfig() *models.Config {
+	return a.cfg
 }
 
 // GetRedisKeys 获取 Redis 键

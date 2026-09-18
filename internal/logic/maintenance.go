@@ -6,38 +6,50 @@ import (
 	"time"
 
 	"MCA-Maintenance/internal/models"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/redis/go-redis/v9"
 )
 
 type MaintenanceService struct {
+	cfg *models.Config
 	db  *sql.DB
 	rdb *redis.Client
 }
 
-func NewMaintenanceService(dbDSN string, redisAddr string, redisPass string, redisDB int) (*MaintenanceService, error) {
-	db, err := sql.Open("mysql", dbDSN)
-	if err != nil {
-		return nil, err
+func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
+	// sql.Open 不会立即建立连接，只是验证 DSN
+	db, _ := sql.Open("mysql", cfg.Database.DSN)
+	if db != nil {
+		db.SetConnMaxLifetime(time.Minute * 3)
+		db.SetMaxOpenConns(10)
+		db.SetMaxIdleConns(10)
 	}
-	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
 
+	// redis.NewClient 只是创建结构体，不会立即尝试连接
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: redisPass,
-		DB:       redisDB,
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
 	})
 
 	return &MaintenanceService{
+		cfg: cfg,
 		db:  db,
 		rdb: rdb,
-	}, nil
+	}
+}
+
+// GetConfig 获取当前配置（用于前端展示上游地址）
+func (s *MaintenanceService) GetConfig() *models.Config {
+	return s.cfg
 }
 
 // GetRedisKeys 获取 Redis 键列表
 func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) ([]models.RedisKey, error) {
+	if s.rdb == nil {
+		return nil, nil
+	}
 	keys, err := s.rdb.Keys(ctx, pattern).Result()
 	if err != nil {
 		return nil, err
@@ -47,7 +59,7 @@ func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) (
 	for _, k := range keys {
 		t, _ := s.rdb.Type(ctx, k).Result()
 		ttl, _ := s.rdb.TTL(ctx, k).Result()
-		val, _ := s.rdb.Get(ctx, k).Result() // 仅支持 string 类型展示，其他类型可扩展
+		val, _ := s.rdb.Get(ctx, k).Result()
 
 		result = append(result, models.RedisKey{
 			Key:   k,
@@ -61,11 +73,17 @@ func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) (
 
 // DeleteRedisKey 删除 Redis 键
 func (s *MaintenanceService) DeleteRedisKey(ctx context.Context, key string) error {
+	if s.rdb == nil {
+		return nil
+	}
 	return s.rdb.Del(ctx, key).Err()
 }
 
 // GetUsers 获取用户列表
 func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error) {
+	if s.db == nil {
+		return nil, nil
+	}
 	rows, err := s.db.QueryContext(ctx, "SELECT uid, level, experience, rank_score, wins_count, created_at FROM users WHERE deleted_at IS NULL LIMIT 100")
 	if err != nil {
 		return nil, err
@@ -87,6 +105,9 @@ func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error
 
 // UpdateUserRankScore 更新用户分数
 func (s *MaintenanceService) UpdateUserRankScore(ctx context.Context, uid int64, score int) error {
+	if s.db == nil {
+		return nil
+	}
 	_, err := s.db.ExecContext(ctx, "UPDATE users SET rank_score = ? WHERE uid = ?", score, uid)
 	return err
 }

@@ -14,10 +14,10 @@ type User struct {
 
 // RedisKey Redis 键值对模型
 type RedisKey struct {
-	Key        string `json:"key"`
-	Type       string `json:"type"`
-	TTL        int64  `json:"ttl"`
-	Value      string `json:"value"`
+	Key   string `json:"key"`
+	Type  string `json:"type"`
+	TTL   int64  `json:"ttl"`
+	Value string `json:"value"`
 }
 
 // RatingSimInput 积分模拟输入
@@ -40,4 +40,23 @@ type RatingSimResult struct {
 	SurvivalWeight  float64 `json:"survival_weight"`
 	StreakWeight    float64 `json:"streak_weight"`
 	PerfWeight      float64 `json:"perf_weight"`
+}
+
+// Config 应用配置
+type Config struct {
+	UpstreamURL string         `yaml:"upstream_url" json:"upstream_url"`
+	Database    DatabaseConfig `yaml:"database" json:"database"`
+	Redis       RedisConfig    `yaml:"redis" json:"redis"`
+}
+
+// DatabaseConfig 数据库配置
+type DatabaseConfig struct {
+	DSN string `yaml:"dsn" json:"dsn"`
+}
+
+// RedisConfig Redis 配置
+type RedisConfig struct {
+	Addr     string `yaml:"addr" json:"addr"`
+	Password string `yaml:"password" json:"password"`
+	DB       int    `yaml:"db" json:"db"`
 }
