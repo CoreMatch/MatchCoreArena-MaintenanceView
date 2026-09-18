@@ -111,3 +111,63 @@ func (s *MaintenanceService) UpdateUserRankScore(ctx context.Context, uid int64,
 	_, err := s.db.ExecContext(ctx, "UPDATE users SET rank_score = ? WHERE uid = ?", score, uid)
 	return err
 }
+
+// GetSystemStats 获取系统统计信息
+func (s *MaintenanceService) GetSystemStats(ctx context.Context) (models.SystemStats, error) {
+	var stats models.SystemStats
+
+	// 1. 获取用户总数
+	if s.db != nil {
+		err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE deleted_at IS NULL").Scan(&stats.TotalUsers)
+		if err != nil {
+			return stats, err
+		}
+	}
+
+	// 2. 获取 Redis 键总数
+	if s.rdb != nil {
+		count, err := s.rdb.DBSize(ctx).Result()
+		if err == nil {
+			stats.RedisKeys = count
+		}
+
+		// 3. 获取活跃对局数 (假设 Redis 中以 match: 开头的键代表活跃对局)
+		matches, err := s.rdb.Keys(ctx, "match:*").Result()
+		if err == nil {
+			stats.ActiveMatches = int64(len(matches))
+		}
+	}
+
+	return stats, nil
+}
+
+// UploadMatchResult 手动上传对局战绩
+func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result models.MatchResult) error {
+	if s.db == nil {
+		return nil
+	}
+
+	// 开启事务
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// 1. 更新用户积分和获胜次数
+	var winInc int
+	if result.IsWinner {
+		winInc = 1
+	}
+
+	_, err = tx.ExecContext(ctx,
+		"UPDATE users SET rank_score = rank_score + ?, wins_count = wins_count + ? WHERE uid = ?",
+		result.ScoreDelta, winInc, result.UID,
+	)
+	if err != nil {
+		return err
+	}
+
+	// 2. 提交事务
+	return tx.Commit()
+}

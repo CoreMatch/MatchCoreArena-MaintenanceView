@@ -19,6 +19,7 @@ import {
   Storage, 
   Dns, 
   Calculate,
+  History,
   Settings
 } from '@mui/icons-material';
 
@@ -26,6 +27,7 @@ import Dashboard from './components/Dashboard';
 import RedisBrowser from './components/RedisBrowser';
 import DatabaseManager from './components/DatabaseManager';
 import RatingSimulator from './components/RatingSimulator';
+import MatchManager from './components/MatchManager';
 
 const drawerWidth = 240;
 
@@ -49,6 +51,7 @@ export default function App() {
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { id: 'redis', label: 'Redis Browser', icon: <Storage /> },
     { id: 'database', label: 'Database', icon: <Dns /> },
+    { id: 'match', label: 'Match Manager', icon: <History /> },
     { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
   ];
 
@@ -58,6 +61,8 @@ export default function App() {
         return <RedisBrowser />;
       case 'database':
         return <DatabaseManager />;
+      case 'match':
+        return <MatchManager />;
       case 'rating':
         return <RatingSimulator />;
       default:

@@ -42,6 +42,24 @@ type RatingSimResult struct {
 	PerfWeight      float64 `json:"perf_weight"`
 }
 
+// SystemStats 系统统计信息
+type SystemStats struct {
+	TotalUsers    int64 `json:"total_users"`
+	ActiveMatches int64 `json:"active_matches"`
+	RedisKeys     int64 `json:"redis_keys"`
+}
+
+// MatchResult 对局战绩模型
+type MatchResult struct {
+	MatchID       string    `json:"match_id"`
+	UID           int64     `json:"uid"`
+	Rank          int       `json:"rank"`
+	ScoreDelta    int       `json:"score_delta"`
+	IsWinner      bool      `json:"is_winner"`
+	MatchTime     time.Time `json:"match_time"`
+	SurvivorCount int       `json:"survivor_count"`
+}
+
 // Config 应用配置
 type Config struct {
 	UpstreamURL string         `yaml:"upstream_url" json:"upstream_url"`

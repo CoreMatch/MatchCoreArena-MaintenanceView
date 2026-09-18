@@ -79,3 +79,19 @@ func (a *App) UpdateUserRankScore(uid int64, score int) error {
 func (a *App) SimulateRating(input models.RatingSimInput) models.RatingSimResult {
 	return logic.SimulateRating(input)
 }
+
+// GetSystemStats 获取系统统计信息
+func (a *App) GetSystemStats() (models.SystemStats, error) {
+	if a.svc == nil {
+		return models.SystemStats{}, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetSystemStats(a.ctx)
+}
+
+// UploadMatchResult 手动上传对局战绩
+func (a *App) UploadMatchResult(result models.MatchResult) error {
+	if a.svc == nil {
+		return fmt.Errorf("service not initialized")
+	}
+	return a.svc.UploadMatchResult(a.ctx, result)
+}

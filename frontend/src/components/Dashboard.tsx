@@ -1,19 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Link } from '@mui/material';
 import { Storage, People, SportsEsports, Language } from '@mui/icons-material';
-import { GetConfig } from '../../wailsjs/go/main/App';
+import { GetConfig, GetSystemStats } from '../../wailsjs/go/main/App';
 
 export default function Dashboard() {
   const [config, setConfig] = useState<any>(null);
+  const [stats, setStats] = useState<any>({
+    total_users: 0,
+    active_matches: 0,
+    redis_keys: 0
+  });
 
   useEffect(() => {
     GetConfig().then(setConfig);
+    GetSystemStats().then(setStats).catch(console.error);
   }, []);
 
-  const stats = [
-    { title: 'Total Users', value: '1,234', icon: <People color="primary" /> },
-    { title: 'Active Matches', value: '42', icon: <SportsEsports color="primary" /> },
-    { title: 'Redis Keys', value: '156', icon: <Storage color="primary" /> },
+  const statCards = [
+    { title: 'Total Users', value: stats.total_users.toLocaleString(), icon: <People color="primary" /> },
+    { title: 'Active Matches', value: stats.active_matches.toLocaleString(), icon: <SportsEsports color="primary" /> },
+    { title: 'Redis Keys', value: stats.redis_keys.toLocaleString(), icon: <Storage color="primary" /> },
   ];
 
   return (
@@ -40,7 +46,7 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <Grid size={{ xs: 12, sm: 4 }} key={stat.title} component="div">
             <Card>
               <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
