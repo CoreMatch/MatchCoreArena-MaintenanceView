@@ -22,9 +22,9 @@ export default function Dashboard() {
         System Overview
       </Typography>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={3} component="div">
         {/* Config Info */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }} component="div">
           <Card sx={{ bgcolor: 'rgba(233, 69, 96, 0.1)', border: '1px solid #e94560' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
               <Language sx={{ mr: 2, color: '#e94560' }} />
@@ -41,7 +41,7 @@ export default function Dashboard() {
         </Grid>
 
         {stats.map((stat) => (
-          <Grid item xs={12} sm={4} key={stat.title}>
+          <Grid size={{ xs: 12, sm: 4 }} key={stat.title} component="div">
             <Card>
               <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box sx={{ mr: 2 }}>

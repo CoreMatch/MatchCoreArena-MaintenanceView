@@ -17,7 +17,7 @@ import {
 import { 
   Dashboard as DashboardIcon, 
   Storage, 
-  Database, 
+  Dns, 
   Calculate,
   Settings
 } from '@mui/icons-material';
@@ -48,7 +48,7 @@ export default function App() {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { id: 'redis', label: 'Redis Browser', icon: <Storage /> },
-    { id: 'database', label: 'Database', icon: <Database /> },
+    { id: 'database', label: 'Database', icon: <Dns /> },
     { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
   ];
 
