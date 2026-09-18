@@ -30,6 +30,7 @@ export namespace models {
 	}
 	export class Config {
 	    upstream_url: string;
+	    api_token: string;
 	    database: DatabaseConfig;
 	    redis: RedisConfig;
 	
@@ -40,6 +41,7 @@ export namespace models {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.upstream_url = source["upstream_url"];
+	        this.api_token = source["api_token"];
 	        this.database = this.convertValues(source["database"], DatabaseConfig);
 	        this.redis = this.convertValues(source["redis"], RedisConfig);
 	    }
@@ -63,6 +65,49 @@ export namespace models {
 		}
 	}
 	
+	export class MatchResult {
+	    match_id: string;
+	    uid: number;
+	    rank: number;
+	    score_delta: number;
+	    is_winner: boolean;
+	    // Go type: time
+	    match_time: any;
+	    survivor_count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MatchResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.match_id = source["match_id"];
+	        this.uid = source["uid"];
+	        this.rank = source["rank"];
+	        this.score_delta = source["score_delta"];
+	        this.is_winner = source["is_winner"];
+	        this.match_time = this.convertValues(source["match_time"], null);
+	        this.survivor_count = source["survivor_count"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class RatingSimInput {
 	    player_rating: number;
 	    opponent_rating: number;
@@ -128,6 +173,22 @@ export namespace models {
 	        this.type = source["type"];
 	        this.ttl = source["ttl"];
 	        this.value = source["value"];
+	    }
+	}
+	export class SystemStats {
+	    total_users: number;
+	    active_matches: number;
+	    redis_keys: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SystemStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.total_users = source["total_users"];
+	        this.active_matches = source["active_matches"];
+	        this.redis_keys = source["redis_keys"];
 	    }
 	}
 	export class User {

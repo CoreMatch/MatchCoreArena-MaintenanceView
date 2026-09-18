@@ -14,6 +14,10 @@ export function GetRedisKeys(arg1) {
   return window['go']['main']['App']['GetRedisKeys'](arg1);
 }
 
+export function GetSystemStats() {
+  return window['go']['main']['App']['GetSystemStats']();
+}
+
 export function GetUsers() {
   return window['go']['main']['App']['GetUsers']();
 }
@@ -24,4 +28,8 @@ export function SimulateRating(arg1) {
 
 export function UpdateUserRankScore(arg1, arg2) {
   return window['go']['main']['App']['UpdateUserRankScore'](arg1, arg2);
+}
+
+export function UploadMatchResult(arg1) {
+  return window['go']['main']['App']['UploadMatchResult'](arg1);
 }

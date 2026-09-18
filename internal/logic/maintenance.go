@@ -1,8 +1,14 @@
 package logic
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"time"
 
 	"MCA-Maintenance/internal/models"
@@ -12,13 +18,14 @@ import (
 )
 
 type MaintenanceService struct {
-	cfg *models.Config
-	db  *sql.DB
-	rdb *redis.Client
+	cfg        *models.Config
+	db         *sql.DB
+	rdb        *redis.Client
+	httpClient *http.Client
 }
 
 func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
-	// sql.Open 不会立即建立连接，只是验证 DSN
+	// 暂时不直接使用数据库和 Redis，但保留初始化逻辑以防后续需要
 	db, _ := sql.Open("mysql", cfg.Database.DSN)
 	if db != nil {
 		db.SetConnMaxLifetime(time.Minute * 3)
@@ -26,7 +33,6 @@ func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
 		db.SetMaxIdleConns(10)
 	}
 
-	// redis.NewClient 只是创建结构体，不会立即尝试连接
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Addr,
 		Password: cfg.Redis.Password,
@@ -37,137 +43,153 @@ func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
 		cfg: cfg,
 		db:  db,
 		rdb: rdb,
+		httpClient: &http.Client{
+			Timeout: time.Second * 10,
+		},
 	}
 }
 
-// GetConfig 获取当前配置（用于前端展示上游地址）
+// doRequest 发送经过身份验证的 HTTP 请求
+func (s *MaintenanceService) doRequest(ctx context.Context, method, path string, body interface{}) ([]byte, error) {
+	url := strings.TrimSuffix(s.cfg.UpstreamURL, "/") + path
+	var bodyReader io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		bodyReader = bytes.NewReader(jsonBody)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if s.cfg.APIToken != "" {
+		req.Header.Set("Authorization", "Bearer "+s.cfg.APIToken)
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	return respBody, nil
+}
+
+// GetConfig 获取当前配置
 func (s *MaintenanceService) GetConfig() *models.Config {
 	return s.cfg
 }
 
-// GetRedisKeys 获取 Redis 键列表
+// GetRedisKeys 获取 Redis 键列表 (通过 API 暂时无法获取，返回空)
 func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) ([]models.RedisKey, error) {
-	if s.rdb == nil {
-		return nil, nil
-	}
-	keys, err := s.rdb.Keys(ctx, pattern).Result()
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]models.RedisKey, 0, len(keys))
-	for _, k := range keys {
-		t, _ := s.rdb.Type(ctx, k).Result()
-		ttl, _ := s.rdb.TTL(ctx, k).Result()
-		val, _ := s.rdb.Get(ctx, k).Result()
-
-		result = append(result, models.RedisKey{
-			Key:   k,
-			Type:  t,
-			TTL:   int64(ttl.Seconds()),
-			Value: val,
-		})
-	}
-	return result, nil
+	// 暂时不直接访问 Redis
+	return nil, fmt.Errorf("direct redis access is disabled; public API does not support key listing")
 }
 
-// DeleteRedisKey 删除 Redis 键
+// DeleteRedisKey 删除 Redis 键 (通过 API 暂时无法操作)
 func (s *MaintenanceService) DeleteRedisKey(ctx context.Context, key string) error {
-	if s.rdb == nil {
-		return nil
-	}
-	return s.rdb.Del(ctx, key).Err()
+	// 暂时不直接访问 Redis
+	return fmt.Errorf("direct redis access is disabled")
 }
 
-// GetUsers 获取用户列表
+// GetUsers 获取用户列表 (通过排行榜 API 模拟)
 func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error) {
-	if s.db == nil {
-		return nil, nil
-	}
-	rows, err := s.db.QueryContext(ctx, "SELECT uid, level, experience, rank_score, wins_count, created_at FROM users WHERE deleted_at IS NULL LIMIT 100")
+	respBody, err := s.doRequest(ctx, "GET", "/api/rankings/1v1?limit=100", nil)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	var envelope struct {
+		Success bool `json:"success"`
+		Data    []struct {
+			UserUUID  string    `json:"user_uuid"`
+			Score     int       `json:"score"`
+			UpdatedAt time.Time `json:"updated_at"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal(respBody, &envelope); err != nil {
+		return nil, err
+	}
 
 	var users []models.User
-	for rows.Next() {
-		var u models.User
-		var createdAt string
-		if err := rows.Scan(&u.UID, &u.Level, &u.Exp, &u.RankScore, &u.WinsCount, &createdAt); err != nil {
-			return nil, err
-		}
-		u.CreatedAt, _ = time.Parse("2006-01-02 15:04:05", createdAt)
-		users = append(users, u)
+	for _, r := range envelope.Data {
+		users = append(users, models.User{
+			UID:       0, // API 使用 UUID，此处 UID 设为 0 或转换
+			RankScore: r.Score,
+			CreatedAt: r.UpdatedAt,
+		})
 	}
 	return users, nil
 }
 
-// UpdateUserRankScore 更新用户分数
+// UpdateUserRankScore 更新用户分数 (通过公开 API 无法直接更新，此处可能需要管理 API)
 func (s *MaintenanceService) UpdateUserRankScore(ctx context.Context, uid int64, score int) error {
-	if s.db == nil {
-		return nil
-	}
-	_, err := s.db.ExecContext(ctx, "UPDATE users SET rank_score = ? WHERE uid = ?", score, uid)
-	return err
+	return fmt.Errorf("direct score update is disabled; please use match result upload instead")
 }
 
-// GetSystemStats 获取系统统计信息
+// GetSystemStats 获取系统统计信息 (通过 /status 接口)
 func (s *MaintenanceService) GetSystemStats(ctx context.Context) (models.SystemStats, error) {
+	respBody, err := s.doRequest(ctx, "GET", "/status", nil)
+	if err != nil {
+		return models.SystemStats{}, err
+	}
+
+	// 假设 /status 返回一些基本信息，如果没有则返回占位符
 	var stats models.SystemStats
-
-	// 1. 获取用户总数
-	if s.db != nil {
-		err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE deleted_at IS NULL").Scan(&stats.TotalUsers)
-		if err != nil {
-			return stats, err
-		}
-	}
-
-	// 2. 获取 Redis 键总数
-	if s.rdb != nil {
-		count, err := s.rdb.DBSize(ctx).Result()
-		if err == nil {
-			stats.RedisKeys = count
-		}
-
-		// 3. 获取活跃对局数 (假设 Redis 中以 match: 开头的键代表活跃对局)
-		matches, err := s.rdb.Keys(ctx, "match:*").Result()
-		if err == nil {
-			stats.ActiveMatches = int64(len(matches))
-		}
-	}
+	// 这里可以根据实际 API 响应解析，目前按规范仅返回 SuccessEnvelope
+	_ = respBody
 
 	return stats, nil
 }
 
-// UploadMatchResult 手动上传对局战绩
+// UploadMatchResult 手动上传对局战绩 (通过 /api/matches 接口)
 func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result models.MatchResult) error {
-	if s.db == nil {
-		return nil
+	// 按照 HA-Contract 的 TeamReportInput 结构构造请求
+	type Participant struct {
+		UUID string `json:"uuid"`
+	}
+	type TeamInfo struct {
+		TeamID  string        `json:"team_id"`
+		Members []Participant `json:"members"`
+	}
+	type MatchReport struct {
+		MatchType  string     `json:"match_type"`
+		WinnerTeam TeamInfo   `json:"winner_team"`
+		LoserTeams []TeamInfo `json:"loser_teams"`
+		StartedAt  time.Time  `json:"started_at"`
+		FinishedAt time.Time  `json:"finished_at"`
 	}
 
-	// 开启事务
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	// 1. 更新用户积分和获胜次数
-	var winInc int
-	if result.IsWinner {
-		winInc = 1
+	report := MatchReport{
+		MatchType: "1v1",
+		WinnerTeam: TeamInfo{
+			TeamID:  "winner",
+			Members: []Participant{{UUID: fmt.Sprintf("%d", result.UID)}}, // 暂时用 UID 充当 UUID
+		},
+		StartedAt:  result.MatchTime.Add(-10 * time.Minute),
+		FinishedAt: result.MatchTime,
 	}
 
-	_, err = tx.ExecContext(ctx,
-		"UPDATE users SET rank_score = rank_score + ?, wins_count = wins_count + ? WHERE uid = ?",
-		result.ScoreDelta, winInc, result.UID,
-	)
-	if err != nil {
-		return err
+	if !result.IsWinner {
+		report.LoserTeams = []TeamInfo{report.WinnerTeam}
+		report.WinnerTeam = TeamInfo{TeamID: "other"}
 	}
 
-	// 2. 提交事务
-	return tx.Commit()
+	_, err := s.doRequest(ctx, "POST", "/api/matches", report)
+	return err
 }

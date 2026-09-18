@@ -8,8 +8,12 @@ export function GetConfig():Promise<models.Config>;
 
 export function GetRedisKeys(arg1:string):Promise<Array<models.RedisKey>>;
 
+export function GetSystemStats():Promise<models.SystemStats>;
+
 export function GetUsers():Promise<Array<models.User>>;
 
 export function SimulateRating(arg1:models.RatingSimInput):Promise<models.RatingSimResult>;
 
 export function UpdateUserRankScore(arg1:number,arg2:number):Promise<void>;
+
+export function UploadMatchResult(arg1:models.MatchResult):Promise<void>;
