@@ -10,6 +10,10 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
+export function GetConfigHistory() {
+  return window['go']['main']['App']['GetConfigHistory']();
+}
+
 export function GetRedisKeys(arg1) {
   return window['go']['main']['App']['GetRedisKeys'](arg1);
 }
@@ -20,6 +24,14 @@ export function GetSystemStats() {
 
 export function GetUsers() {
   return window['go']['main']['App']['GetUsers']();
+}
+
+export function RestoreConfig(arg1) {
+  return window['go']['main']['App']['RestoreConfig'](arg1);
+}
+
+export function SaveConfig(arg1) {
+  return window['go']['main']['App']['SaveConfig'](arg1);
 }
 
 export function SimulateRating(arg1) {

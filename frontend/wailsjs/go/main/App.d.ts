@@ -6,11 +6,17 @@ export function DeleteRedisKey(arg1:string):Promise<void>;
 
 export function GetConfig():Promise<models.Config>;
 
+export function GetConfigHistory():Promise<Array<models.ConfigHistoryItem>>;
+
 export function GetRedisKeys(arg1:string):Promise<Array<models.RedisKey>>;
 
 export function GetSystemStats():Promise<models.SystemStats>;
 
 export function GetUsers():Promise<Array<models.User>>;
+
+export function RestoreConfig(arg1:string):Promise<void>;
+
+export function SaveConfig(arg1:models.Config):Promise<void>;
 
 export function SimulateRating(arg1:models.RatingSimInput):Promise<models.RatingSimResult>;
 

@@ -95,3 +95,35 @@ func (a *App) UploadMatchResult(result models.MatchResult) error {
 	}
 	return a.svc.UploadMatchResult(a.ctx, result)
 }
+
+// SaveConfig 保存配置
+func (a *App) SaveConfig(cfg models.Config) error {
+	if a.svc == nil {
+		return fmt.Errorf("service not initialized")
+	}
+	err := a.svc.SaveConfig(a.ctx, cfg)
+	if err == nil {
+		a.cfg = &cfg // 同步更新 App 中的配置缓存
+	}
+	return err
+}
+
+// GetConfigHistory 获取配置历史
+func (a *App) GetConfigHistory() ([]models.ConfigHistoryItem, error) {
+	if a.svc == nil {
+		return nil, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetConfigHistory(a.ctx)
+}
+
+// RestoreConfig 还原配置
+func (a *App) RestoreConfig(filename string) error {
+	if a.svc == nil {
+		return fmt.Errorf("service not initialized")
+	}
+	err := a.svc.RestoreConfig(a.ctx, filename)
+	if err == nil {
+		a.cfg = a.svc.GetConfig() // 同步更新 App 中的配置缓存
+	}
+	return err
+}

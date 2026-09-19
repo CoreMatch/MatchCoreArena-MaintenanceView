@@ -8,12 +8,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
 	"MCA-Maintenance/internal/models"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/goccy/go-yaml"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -200,4 +204,109 @@ func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result model
 	)
 	_, err = s.executeSQL(ctx, insertMatchSQL)
 	return err
+}
+
+// SaveConfig 保存配置并备份旧版本
+func (s *MaintenanceService) SaveConfig(ctx context.Context, cfg models.Config) error {
+	// 1. 确保备份目录存在
+	historyDir := "config_history"
+	if err := os.MkdirAll(historyDir, 0755); err != nil {
+		return err
+	}
+
+	// 2. 如果旧配置文件存在，先备份
+	configPath := "config.yaml"
+	if _, err := os.Stat(configPath); err == nil {
+		backupFilename := fmt.Sprintf("config_%s.yaml", time.Now().Format("20060102_150405"))
+		backupPath := filepath.Join(historyDir, backupFilename)
+
+		data, err := os.ReadFile(configPath)
+		if err == nil {
+			_ = os.WriteFile(backupPath, data, 0644)
+		}
+	}
+
+	// 3. 保存新配置
+	newData, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(configPath, newData, 0644)
+	if err == nil {
+		s.cfg = &cfg // 更新内存中的配置
+	}
+	return err
+}
+
+// GetConfigHistory 获取配置备份历史
+func (s *MaintenanceService) GetConfigHistory(ctx context.Context) ([]models.ConfigHistoryItem, error) {
+	historyDir := "config_history"
+	files, err := os.ReadDir(historyDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []models.ConfigHistoryItem{}, nil
+		}
+		return nil, err
+	}
+
+	var history []models.ConfigHistoryItem
+	for _, f := range files {
+		if !f.IsDir() && strings.HasPrefix(f.Name(), "config_") && strings.HasSuffix(f.Name(), ".yaml") {
+			info, err := f.Info()
+			if err != nil {
+				continue
+			}
+
+			// 从文件名解析版本号 (时间戳)
+			version := strings.TrimSuffix(strings.TrimPrefix(f.Name(), "config_"), ".yaml")
+
+			history = append(history, models.ConfigHistoryItem{
+				Version:   version,
+				Timestamp: info.ModTime(),
+				Filename:  f.Name(),
+			})
+		}
+	}
+
+	// 按时间倒序排列
+	sort.Slice(history, func(i, j int) bool {
+		return history[i].Timestamp.After(history[j].Timestamp)
+	})
+
+	return history, nil
+}
+
+// RestoreConfig 还原指定版本的配置
+func (s *MaintenanceService) RestoreConfig(ctx context.Context, filename string) error {
+	historyDir := "config_history"
+	backupPath := filepath.Join(historyDir, filename)
+	configPath := "config.yaml"
+
+	// 1. 读取备份文件
+	data, err := os.ReadFile(backupPath)
+	if err != nil {
+		return err
+	}
+
+	// 2. 备份当前配置
+	currentBackup := fmt.Sprintf("config_before_restore_%s.yaml", time.Now().Format("20060102_150405"))
+	currentData, _ := os.ReadFile(configPath)
+	if len(currentData) > 0 {
+		_ = os.WriteFile(filepath.Join(historyDir, currentBackup), currentData, 0644)
+	}
+
+	// 3. 覆盖当前配置
+	err = os.WriteFile(configPath, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	// 4. 尝试更新内存配置
+	var newCfg models.Config
+	if err := yaml.Unmarshal(data, &newCfg); err == nil {
+		s.cfg = &newCfg
+	}
+
+	return nil
 }

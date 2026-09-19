@@ -60,6 +60,13 @@ type MatchResult struct {
 	SurvivorCount int       `json:"survivor_count"`
 }
 
+// ConfigHistoryItem 配置历史项
+type ConfigHistoryItem struct {
+	Version   string    `json:"version"`
+	Timestamp time.Time `json:"timestamp"`
+	Filename  string    `json:"filename"`
+}
+
 // Config 应用配置
 type Config struct {
 	UpstreamURL     string         `yaml:"upstream_url" json:"upstream_url"`

@@ -28,6 +28,7 @@ import RedisBrowser from './components/RedisBrowser';
 import DatabaseManager from './components/DatabaseManager';
 import RatingSimulator from './components/RatingSimulator';
 import MatchManager from './components/MatchManager';
+import ConfigManager from './components/ConfigManager';
 
 const drawerWidth = 240;
 
@@ -53,6 +54,7 @@ export default function App() {
     { id: 'database', label: 'Database', icon: <Dns /> },
     { id: 'match', label: 'Match Manager', icon: <History /> },
     { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
+    { id: 'config', label: 'Config Manager', icon: <Settings /> },
   ];
 
   const renderContent = () => {
@@ -65,6 +67,8 @@ export default function App() {
         return <MatchManager />;
       case 'rating':
         return <RatingSimulator />;
+      case 'config':
+        return <ConfigManager />;
       default:
         return <Dashboard />;
     }
