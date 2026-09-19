@@ -67,8 +67,8 @@ func (s *MaintenanceService) doRequest(ctx context.Context, method, path string,
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if s.cfg.APIToken != "" {
-		req.Header.Set("Authorization", "Bearer "+s.cfg.APIToken)
+	if s.cfg.ManagementToken != "" {
+		req.Header.Set("Authorization", "Bearer "+s.cfg.ManagementToken)
 	}
 
 	resp, err := s.httpClient.Do(req)
@@ -89,107 +89,115 @@ func (s *MaintenanceService) doRequest(ctx context.Context, method, path string,
 	return respBody, nil
 }
 
-// GetConfig 获取当前配置
-func (s *MaintenanceService) GetConfig() *models.Config {
-	return s.cfg
-}
-
-// GetRedisKeys 获取 Redis 键列表 (通过 API 暂时无法获取，返回空)
-func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) ([]models.RedisKey, error) {
-	// 暂时不直接访问 Redis
-	return nil, fmt.Errorf("direct redis access is disabled; public API does not support key listing")
-}
-
-// DeleteRedisKey 删除 Redis 键 (通过 API 暂时无法操作)
-func (s *MaintenanceService) DeleteRedisKey(ctx context.Context, key string) error {
-	// 暂时不直接访问 Redis
-	return fmt.Errorf("direct redis access is disabled")
-}
-
-// GetUsers 获取用户列表 (通过排行榜 API 模拟)
-func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error) {
-	respBody, err := s.doRequest(ctx, "GET", "/api/rankings/1v1?limit=100", nil)
+// executeSQL 使用运维 Token 执行 SQL 语句
+func (s *MaintenanceService) executeSQL(ctx context.Context, query string) (json.RawMessage, error) {
+	body := map[string]string{"sql": query}
+	respBody, err := s.doRequest(ctx, "POST", "/api/maintenance/sql", body)
 	if err != nil {
 		return nil, err
 	}
 
 	var envelope struct {
-		Success bool `json:"success"`
-		Data    []struct {
-			UserUUID  string    `json:"user_uuid"`
-			Score     int       `json:"score"`
-			UpdatedAt time.Time `json:"updated_at"`
-		} `json:"data"`
+		Success bool            `json:"success"`
+		Data    json.RawMessage `json:"data"`
 	}
-
 	if err := json.Unmarshal(respBody, &envelope); err != nil {
 		return nil, err
 	}
 
-	var users []models.User
-	for _, r := range envelope.Data {
-		users = append(users, models.User{
-			UID:       0, // API 使用 UUID，此处 UID 设为 0 或转换
-			RankScore: r.Score,
-			CreatedAt: r.UpdatedAt,
-		})
+	return envelope.Data, nil
+}
+
+// GetConfig 获取当前配置
+func (s *MaintenanceService) GetConfig() *models.Config {
+	return s.cfg
+}
+
+// GetRedisKeys 获取 Redis 键列表 (目前 API 仍不支持，除非通过特定的运维 SQL 查询系统表，暂保持原样或说明)
+func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) ([]models.RedisKey, error) {
+	return nil, fmt.Errorf("direct redis access is disabled; please use management SQL if needed for database queries")
+}
+
+// DeleteRedisKey 删除 Redis 键
+func (s *MaintenanceService) DeleteRedisKey(ctx context.Context, key string) error {
+	return fmt.Errorf("direct redis access is disabled")
+}
+
+// GetUsers 获取用户列表 (通过运维 SQL 获取完整数据)
+func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error) {
+	query := "SELECT uid, level, experience, rank_score, wins_count, created_at FROM users WHERE deleted_at IS NULL LIMIT 100"
+	data, err := s.executeSQL(ctx, query)
+	if err != nil {
+		return nil, err
 	}
+
+	var users []models.User
+	if err := json.Unmarshal(data, &users); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }
 
-// UpdateUserRankScore 更新用户分数 (通过公开 API 无法直接更新，此处可能需要管理 API)
+// UpdateUserRankScore 更新用户分数 (通过运维 SQL 直接修正)
 func (s *MaintenanceService) UpdateUserRankScore(ctx context.Context, uid int64, score int) error {
-	return fmt.Errorf("direct score update is disabled; please use match result upload instead")
+	query := fmt.Sprintf("UPDATE users SET rank_score = %d WHERE uid = %d", score, uid)
+	_, err := s.executeSQL(ctx, query)
+	return err
 }
 
-// GetSystemStats 获取系统统计信息 (通过 /status 接口)
+// GetSystemStats 获取系统统计信息 (通过运维 SQL 获取真实数字)
 func (s *MaintenanceService) GetSystemStats(ctx context.Context) (models.SystemStats, error) {
-	respBody, err := s.doRequest(ctx, "GET", "/status", nil)
-	if err != nil {
-		return models.SystemStats{}, err
+	var stats models.SystemStats
+
+	// 1. 获取用户总数
+	userData, err := s.executeSQL(ctx, "SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL")
+	if err == nil {
+		var res []map[string]interface{}
+		if json.Unmarshal(userData, &res) == nil && len(res) > 0 {
+			if count, ok := res[0]["count"].(float64); ok {
+				stats.TotalUsers = int64(count)
+			}
+		}
 	}
 
-	// 假设 /status 返回一些基本信息，如果没有则返回占位符
-	var stats models.SystemStats
-	// 这里可以根据实际 API 响应解析，目前按规范仅返回 SuccessEnvelope
-	_ = respBody
+	// 2. 获取 Redis 键总数 (如果后端支持通过 SQL 查询监控数据，否则仍为 0)
+	// 3. 获取活跃对局数
+	matchData, err := s.executeSQL(ctx, "SELECT COUNT(*) as count FROM matches WHERE finished_at IS NULL")
+	if err == nil {
+		var res []map[string]interface{}
+		if json.Unmarshal(matchData, &res) == nil && len(res) > 0 {
+			if count, ok := res[0]["count"].(float64); ok {
+				stats.ActiveMatches = int64(count)
+			}
+		}
+	}
 
 	return stats, nil
 }
 
-// UploadMatchResult 手动上传对局战绩 (通过 /api/matches 接口)
+// UploadMatchResult 手动上传对局战绩 (作为运维操作，使用 SQL 直接更新)
 func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result models.MatchResult) error {
-	// 按照 HA-Contract 的 TeamReportInput 结构构造请求
-	type Participant struct {
-		UUID string `json:"uuid"`
-	}
-	type TeamInfo struct {
-		TeamID  string        `json:"team_id"`
-		Members []Participant `json:"members"`
-	}
-	type MatchReport struct {
-		MatchType  string     `json:"match_type"`
-		WinnerTeam TeamInfo   `json:"winner_team"`
-		LoserTeams []TeamInfo `json:"loser_teams"`
-		StartedAt  time.Time  `json:"started_at"`
-		FinishedAt time.Time  `json:"finished_at"`
+	// 1. 更新用户积分和获胜次数
+	winInc := 0
+	if result.IsWinner {
+		winInc = 1
 	}
 
-	report := MatchReport{
-		MatchType: "1v1",
-		WinnerTeam: TeamInfo{
-			TeamID:  "winner",
-			Members: []Participant{{UUID: fmt.Sprintf("%d", result.UID)}}, // 暂时用 UID 充当 UUID
-		},
-		StartedAt:  result.MatchTime.Add(-10 * time.Minute),
-		FinishedAt: result.MatchTime,
+	updateUserSQL := fmt.Sprintf(
+		"UPDATE users SET rank_score = rank_score + %d, wins_count = wins_count + %d WHERE uid = %d",
+		result.ScoreDelta, winInc, result.UID,
+	)
+	_, err := s.executeSQL(ctx, updateUserSQL)
+	if err != nil {
+		return err
 	}
 
-	if !result.IsWinner {
-		report.LoserTeams = []TeamInfo{report.WinnerTeam}
-		report.WinnerTeam = TeamInfo{TeamID: "other"}
-	}
-
-	_, err := s.doRequest(ctx, "POST", "/api/matches", report)
+	// 2. 插入战绩记录 (假设存在 matches 表)
+	insertMatchSQL := fmt.Sprintf(
+		"INSERT INTO matches (match_type, winner_uid, score_delta, created_at) VALUES ('1v1', %d, %d, '%s')",
+		result.UID, result.ScoreDelta, result.MatchTime.Format("2006-01-02 15:04:05"),
+	)
+	_, err = s.executeSQL(ctx, insertMatchSQL)
 	return err
 }

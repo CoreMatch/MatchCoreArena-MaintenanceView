@@ -62,10 +62,10 @@ type MatchResult struct {
 
 // Config 应用配置
 type Config struct {
-	UpstreamURL string         `yaml:"upstream_url" json:"upstream_url"`
-	APIToken    string         `yaml:"api_token" json:"api_token"`
-	Database    DatabaseConfig `yaml:"database" json:"database"`
-	Redis       RedisConfig    `yaml:"redis" json:"redis"`
+	UpstreamURL     string         `yaml:"upstream_url" json:"upstream_url"`
+	ManagementToken string         `yaml:"management_token" json:"management_token"`
+	Database        DatabaseConfig `yaml:"database" json:"database"`
+	Redis           RedisConfig    `yaml:"redis" json:"redis"`
 }
 
 // DatabaseConfig 数据库配置

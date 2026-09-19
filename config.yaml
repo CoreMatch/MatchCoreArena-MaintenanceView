@@ -1,6 +1,6 @@
 # MCA Maintenance View Configuration
 upstream_url: "https://arena.mcnb.dev/"
-api_token: "your-api-token-here"
+management_token: "your-management-token-here"
 
 database:
   dsn: "root:@tcp(127.0.0.1:3306)/matchcorearena?parseTime=true"

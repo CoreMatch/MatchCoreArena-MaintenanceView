@@ -30,7 +30,7 @@ export namespace models {
 	}
 	export class Config {
 	    upstream_url: string;
-	    api_token: string;
+	    management_token: string;
 	    database: DatabaseConfig;
 	    redis: RedisConfig;
 	
@@ -41,7 +41,7 @@ export namespace models {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.upstream_url = source["upstream_url"];
-	        this.api_token = source["api_token"];
+	        this.management_token = source["management_token"];
 	        this.database = this.convertValues(source["database"], DatabaseConfig);
 	        this.redis = this.convertValues(source["redis"], RedisConfig);
 	    }
