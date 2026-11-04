@@ -197,10 +197,13 @@ func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result model
 		return err
 	}
 
-	// 2. 插入战绩记录 (假设存在 matches 表)
+	// 2. 插入战绩记录（列以 MatchCoreArena-Server 的 baseline schema 为准：
+	// matches 无 score_delta 列；started_at/finished_at 为 NOT NULL 且无默认值，
+	// 取本条记录唯一的可用时间 MatchTime）
+	matchTime := result.MatchTime.Format("2006-01-02 15:04:05")
 	insertMatchSQL := fmt.Sprintf(
-		"INSERT INTO matches (match_type, winner_uid, score_delta, created_at) VALUES ('1v1', %d, %d, '%s')",
-		result.UID, result.ScoreDelta, result.MatchTime.Format("2006-01-02 15:04:05"),
+		"INSERT INTO matches (match_type, winner_uid, started_at, finished_at, created_at) VALUES ('1v1', %d, '%s', '%s', '%s')",
+		result.UID, matchTime, matchTime, matchTime,
 	)
 	_, err = s.executeSQL(ctx, insertMatchSQL)
 	return err
