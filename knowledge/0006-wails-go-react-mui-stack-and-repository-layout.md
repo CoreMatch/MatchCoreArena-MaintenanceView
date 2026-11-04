@@ -1,0 +1,60 @@
+# 0006. Wails v2 + Go Backend with React 19/MUI Frontend; HA-Contract Vendored as a Local Symlink
+
+## Status
+Accepted
+
+## Date
+2026-09-19
+
+## Context
+The project needed an operator UI with direct access to Go-side HTTP and
+config logic, distributable to individual operators without hosting anything.
+It was initialized from the official Wails React-TS template, which still
+shows in the untouched root README.
+
+## Decision
+- Wails v2 (v2.15.0) desktop app: Go module `MCA-Maintenance` on Go 1.25.0.
+  The built frontend is embedded via `//go:embed all:frontend/dist` and the
+  `App` struct is bound to it; the Linux build uses the `webkit2_41` tag.
+- Frontend: React 19 + TypeScript + Vite 7 + MUI 9 (dark theme), a single
+  page with a fixed sidebar routing between six views (Dashboard, Redis
+  Browser, Database, Match Manager, Rating Simulator, Config Manager).
+- Backend layout: `app.go` holds all Wails-bound methods and delegates to
+  `internal/logic` (MaintenanceService + rating simulation), with DTOs in
+  `internal/models` and YAML loading in `internal/config`. The frontend calls
+  Go through generated bindings under `frontend/wailsjs/`.
+- HA-Contract is vendored as a committed symlink at the repo root pointing to
+  the absolute local path `/home/lnb/Desktop/HA/HA-Contract/`;
+  `.trae/rules/docs.md` declares HA-Contract the sole documentation authority.
+- `go-sql-driver/mysql` and `go-redis/v9` remain as dependencies for the
+  direct-access clients that are initialized but currently unused (entry
+  0002); `goccy/go-yaml` handles config parsing and saving.
+
+## Consequences
+- Single-binary distribution with no server component; the UI calls Go
+  directly with no internal HTTP layer.
+- Costs and limitations:
+  - The HA-Contract symlink is an absolute path; it resolves only on the
+    original author's machine layout and dangles in any other checkout.
+  - The frontend must be built before the Go binary embeds it, and the
+    committed generated bindings can drift from `app.go` if regeneration is
+    forgotten after changing bound methods.
+  - `recharts` and `lucide-react` are declared in `package.json` but never
+    imported anywhere under `frontend/src` — dead dependencies.
+  - The root README.md is still the stock Wails template text and does not
+    describe this tool.
+
+## Evidence
+- go.mod:1-10 — module name, Go 1.25.0, direct dependencies
+- main.go:11-31 — embed of frontend/dist, Wails options, bound App
+- wails.json:1-14 — project config incl. `build:tags: webkit2_41`
+- frontend/package.json:11-27 — React 19, MUI 9, Vite 7, recharts, lucide-react
+- frontend/src/App.tsx:1-58 — imports, theme, sidebar menu
+- app.go:13-129 — full Wails-bound method surface
+- frontend/wailsjs/go/main/App.d.ts:5-25 — generated binding surface
+- .trae/rules/docs.md:1-5 — HA-Contract as documentation authority
+- README.md:1-19 — stock Wails template README
+- git ls-tree HEAD — `HA-Contract` mode 120000, target `/home/lnb/Desktop/HA/HA-Contract/`
+- commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool
+- commit a0f65e13f08c2809501dd8e55c45a7bcf036dbf9 — refactor(frontend): modernize mui component syntax
+- commit 805f4c520070add69b05ae63f52d1859af0bb940 — build(wails): update config and runtime file perms
