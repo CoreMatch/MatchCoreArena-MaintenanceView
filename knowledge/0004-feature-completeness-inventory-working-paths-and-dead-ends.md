@@ -38,39 +38,44 @@ Dead or broken paths:
   `SELECT COUNT(*) FROM matches WHERE finished_at IS NULL`, but the server
   baseline declares `finished_at TIMESTAMP NOT NULL`, so the count is
   structurally always 0.
-- Match Manager upload — the user-update statement is plausible, but the
-  follow-up `INSERT INTO matches (match_type, winner_uid, score_delta, ...)`
-  references a nonexistent `score_delta` column and omits the NOT NULL
-  `loser_uid`; it cannot succeed against the baseline schema. The code comment
-  itself only "assumes the matches table exists". The form also collects
+- Match Manager upload — the user-update statement is plausible; the follow-up
+  `INSERT INTO matches` referenced a nonexistent `score_delta` column and
+  omitted the NOT NULL `started_at`/`finished_at`, so it could not succeed
+  against the baseline schema (the code comment itself only "assumed the
+  matches table exists"). This INSERT was fixed on 2026-11-04 (commit
+  e833eb9, see entry 0007): it now uses the real columns and sets both
+  timestamps to `MatchTime`. Semantic gaps remain: the form collects
   `match_id`, `rank`, and `survivor_count`, which the backend ignores
-  entirely.
+  entirely, and `winner_uid` is written unconditionally regardless of
+  `is_winner`.
 - User list has a hard-coded `LIMIT 100` with no pagination, filtering, or
   search.
 
 ## Consequences
 - Operators must know the Redis page and two of the three dashboard stats are
   decorative; the reliable numbers are Total Users and the user table itself.
-- Manual match-result upload surfaces a runtime SQL error; manual score
-  correction through User Management remains the working fallback for fixing
-  ratings.
+- Manual match-result upload became executable on 2026-11-04 (e833eb9, see
+  entry 0007); manual score correction through User Management remains the
+  simpler fallback for fixing ratings.
 - Costs and limitations:
   - The UI promises more than the backend delivers; nothing in the UI marks
     the dead surfaces as disabled.
   - This repo contains no tests at all (no `*_test.go`, no frontend tests),
     so schema drift like the broken INSERT is caught only at runtime.
-  - The broken INSERT and the always-zero stats are silent failures: the tool
-    reports success paths that depend on statements that never execute.
+  - The broken INSERT (fixed 2026-11-04) and the always-zero stats are/were
+    silent failures: the tool reports success paths that depend on statements
+    that never executed correctly.
 
 ## Evidence
-- internal/logic/maintenance.go:120-128 — Redis methods hard-disabled
-- internal/logic/maintenance.go:130-144 — GetUsers with hard-coded LIMIT 100
-- internal/logic/maintenance.go:153-181 — stats queries; Redis-keys comment at line 168; active-matches query at line 170
-- internal/logic/maintenance.go:183-207 — UploadMatchResult; "assumes matches table" comment at line 200; INSERT at lines 201-204
+- internal/logic/maintenance.go:121-129 — Redis methods hard-disabled
+- internal/logic/maintenance.go:131-146 — GetUsers with hard-coded LIMIT 100
+- internal/logic/maintenance.go:154-181 — stats queries; Redis-keys comment at line 168; active-matches query at line 170
+- internal/logic/maintenance.go:184-211 — UploadMatchResult; INSERT fixed on 2026-11-04 (commit e833eb9, see entry 0007); previously referenced a nonexistent `score_delta` column and omitted NOT NULL `started_at`/`finished_at`
 - internal/models/models.go:52-61 — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
 - frontend/src/components/RedisBrowser.tsx:29-47 — UI still calls the disabled backend
 - frontend/src/components/Dashboard.tsx:19-23 — three stat cards including always-zero Redis Keys
 - frontend/src/components/MatchManager.tsx:18-25, 33-70 — form fields and submit path
-- MatchCoreArena-Server migrate/migrations/baseline.sql:58-74 — matches schema: no `score_delta` column, `loser_uid` NOT NULL (line 62), `finished_at` NOT NULL (line 69)
+- MatchCoreArena-Server migrate/migrations/baseline.sql:58-76 — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0 (lines 61-62); `started_at`/`finished_at` NOT NULL without defaults (lines 70-71) — schema state since server commit eff1784 (2026-11-04)
 - MatchCoreArena-Server migrate/migrations/baseline.sql:7-18 — users schema (columns referenced by GetUsers do exist)
 - commit b7430052b2dc95eb82885c61fafacf7207a14f13 — HEAD at the time of this inventory
+- commit e833eb9 — 2026-11-04 fix of the upload INSERT (see entry 0007)

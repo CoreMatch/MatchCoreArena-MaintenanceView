@@ -49,10 +49,10 @@ return errors unconditionally.
 
 ## Evidence
 - internal/logic/maintenance.go:31-54 — db/redis clients initialized but unused (comment at line 32)
-- internal/logic/maintenance.go:96-113 — `executeSQL` helper posting `{"sql": ...}` to `/api/maintenance/sql`
-- internal/logic/maintenance.go:120-128 — Redis methods hard-disabled with error returns
-- internal/logic/maintenance.go:130-151 — GetUsers / UpdateUserRankScore SQL
-- internal/logic/maintenance.go:153-207 — GetSystemStats / UploadMatchResult SQL
+- internal/logic/maintenance.go:97-114 — `executeSQL` helper posting `{"sql": ...}` to `/api/maintenance/sql`
+- internal/logic/maintenance.go:121-129 — Redis methods hard-disabled with error returns
+- internal/logic/maintenance.go:131-152 — GetUsers / UpdateUserRankScore SQL
+- internal/logic/maintenance.go:154-211 — GetSystemStats / UploadMatchResult SQL
 - HA-Contract docs/api/openapi/matchcorearena-business.yaml:807-858 — contract for `/api/maintenance/sql`
 - MatchCoreArena-Server internal/service/maintenance.go:26-46 — server executes raw SQL (Query, fallback Exec)
 - commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — original direct MySQL/Redis implementation
