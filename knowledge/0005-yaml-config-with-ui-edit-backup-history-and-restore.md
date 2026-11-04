@@ -48,10 +48,10 @@ in-app management.
     it is visible in the webview despite the masked input field.
 
 ## Evidence
-- internal/logic/maintenance.go:209-240 — SaveConfig with pre-write timestamped backup
-- internal/logic/maintenance.go:242-278 — GetConfigHistory directory listing, newest-first
-- internal/logic/maintenance.go:280-312 — RestoreConfig with pre-restore snapshot
-- internal/logic/maintenance.go:57-58, 115-118 — per-request config reads; GetConfig
+- internal/logic/maintenance.go:213-245 — SaveConfig with pre-write timestamped backup
+- internal/logic/maintenance.go:246-283 — GetConfigHistory directory listing, newest-first
+- internal/logic/maintenance.go:284-315 — RestoreConfig with pre-restore snapshot
+- internal/logic/maintenance.go:57-58, 116-119 — per-request config reads; GetConfig
 - internal/config/config.go:10-14 — built-in defaults
 - internal/config/config.go:16-41 — load with missing-file fallback to defaults
 - internal/models/models.go:63-88 — Config / ConfigHistoryItem models
