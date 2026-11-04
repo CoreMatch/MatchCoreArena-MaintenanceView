@@ -48,17 +48,17 @@ in-app management.
     it is visible in the webview despite the masked input field.
 
 ## Evidence
-- internal/logic/maintenance.go:213-245 — SaveConfig with pre-write timestamped backup
-- internal/logic/maintenance.go:246-283 — GetConfigHistory directory listing, newest-first
-- internal/logic/maintenance.go:284-315 — RestoreConfig with pre-restore snapshot
-- internal/logic/maintenance.go:57-58, 116-119 — per-request config reads; GetConfig
-- internal/config/config.go:10-14 — built-in defaults
-- internal/config/config.go:16-41 — load with missing-file fallback to defaults
-- internal/models/models.go:63-88 — Config / ConfigHistoryItem models
-- app.go:99-129 — SaveConfig/GetConfigHistory/RestoreConfig bindings with cache refresh
-- frontend/src/components/ConfigManager.tsx:44-100, 108-226 — editor, save, history table, restore
-- config.yaml:1-11 — committed config with placeholder token
-- .gitignore:1-3 — config.yaml and config_history/ are not ignored
+- internal/logic/maintenance.go::SaveConfig — SaveConfig with pre-write timestamped backup
+- internal/logic/maintenance.go::GetConfigHistory — GetConfigHistory directory listing, newest-first
+- internal/logic/maintenance.go::RestoreConfig — RestoreConfig with pre-restore snapshot
+- internal/logic/maintenance.go::doRequest, internal/logic/maintenance.go::GetConfig — per-request config reads; GetConfig
+- internal/config/config.go::DefaultUpstreamURL — built-in defaults
+- internal/config/config.go::LoadConfig — load with missing-file fallback to defaults
+- internal/models/models.go::ConfigHistoryItem, internal/models/models.go::Config — Config / ConfigHistoryItem models
+- app.go::SaveConfig, app.go::GetConfigHistory, app.go::RestoreConfig — SaveConfig/GetConfigHistory/RestoreConfig bindings with cache refresh
+- frontend/src/components/ConfigManager.tsx::ConfigManager — editor, save, history table, restore
+- config.yaml (field: management_token) — committed config with placeholder token
+- .gitignore::build — config.yaml and config_history/ are not ignored
 - commit 8fbb1d9585517c75f6e0a74f07e6a5f4ace39fd1 — feat: add yaml config support and refactor service to use config
 - commit d71ac1f8152a98bad47278d8015b4e909710f325 — renamed `api_token` to `management_token`
 - commit b7430052b2dc95eb82885c61fafacf7207a14f13 — feat(config): add config management with backup, history and restore

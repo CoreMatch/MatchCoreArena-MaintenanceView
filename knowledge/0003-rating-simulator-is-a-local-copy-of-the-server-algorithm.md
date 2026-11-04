@@ -49,14 +49,14 @@ config.
   - Results are ephemeral — nothing is persisted or logged.
 
 ## Evidence
-- internal/logic/rating.go:8-14 — constants (threshold, K placement/stability)
-- internal/logic/rating.go:16-18 — Elo expected score
-- internal/logic/rating.go:20-27 — K-factor schedule
-- internal/logic/rating.go:29-67 — survival and streak weights
-- internal/logic/rating.go:69-77 — performance clamp
-- internal/logic/rating.go:79-101 — SimulateRating delta formula
-- app.go:78-81 — SimulateRating bound to the frontend
-- frontend/src/components/RatingSimulator.tsx:17-37 — manual input state and local simulate call
-- frontend/src/components/RatingSimulator.tsx:118-147 — result breakdown display
-- MatchCoreArena-Server internal/rating/rating.go:8-17, 21-23, 27-37, 42-57, 74-82, 86-107, 111-114 — the server-side source the copy mirrors
+- internal/logic/rating.go::PlacementWinsThreshold — constants (threshold, K placement/stability)
+- internal/logic/rating.go::CalculateEloExpected — Elo expected score
+- internal/logic/rating.go::GetKFactor — K-factor schedule
+- internal/logic/rating.go::GetSurvivalWeight, internal/logic/rating.go::GetStreakWeight — survival and streak weights
+- internal/logic/rating.go::GetIndividualPerformanceTweak — performance clamp
+- internal/logic/rating.go::SimulateRating — SimulateRating delta formula
+- app.go::SimulateRating — SimulateRating bound to the frontend
+- frontend/src/components/RatingSimulator.tsx::SimulateRating — manual input state and local simulate call
+- frontend/src/components/RatingSimulator.tsx::expected_win_rate — result breakdown display
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::PlacementWinsThreshold, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateEloExpected, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetKFactor, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetSurvivalWeight, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateTeamAverageRating, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetStreakWeight, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateDelta — the server-side source the copy mirrors
 - commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool (introduced the simulator)

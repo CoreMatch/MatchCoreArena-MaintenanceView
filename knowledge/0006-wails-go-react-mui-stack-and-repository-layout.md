@@ -45,15 +45,15 @@ shows in the untouched root README.
     describe this tool.
 
 ## Evidence
-- go.mod:1-10 — module name, Go 1.25.0, direct dependencies
-- main.go:11-31 — embed of frontend/dist, Wails options, bound App
-- wails.json:1-14 — project config incl. `build:tags: webkit2_41`
-- frontend/package.json:11-27 — React 19, MUI 9, Vite 7, recharts, lucide-react
-- frontend/src/App.tsx:1-58 — imports, theme, sidebar menu
-- app.go:13-129 — full Wails-bound method surface
-- frontend/wailsjs/go/main/App.d.ts:5-25 — generated binding surface
-- .trae/rules/docs.md:1-5 — HA-Contract as documentation authority
-- README.md:1-19 — stock Wails template README
+- go.mod (field: module) — module name, Go 1.25.0, direct dependencies
+- main.go::assets — embed of frontend/dist, Wails options, bound App
+- wails.json (field: build:tags) — project config incl. `build:tags: webkit2_41`
+- frontend/package.json (field: recharts) — React 19, MUI 9, Vite 7, recharts, lucide-react
+- frontend/src/App.tsx::menuItems — imports, theme, sidebar menu
+- app.go::App — full Wails-bound method surface
+- frontend/wailsjs/go/main/App.d.ts::SimulateRating — generated binding surface
+- .trae/rules/docs.md::HA-Contract — HA-Contract as documentation authority
+- README.md::About — stock Wails template README
 - git ls-tree HEAD — `HA-Contract` mode 120000, target `/home/lnb/Desktop/HA/HA-Contract/`
 - commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool
 - commit a0f65e13f08c2809501dd8e55c45a7bcf036dbf9 — refactor(frontend): modernize mui component syntax

@@ -67,15 +67,15 @@ Dead or broken paths:
     that never executed correctly.
 
 ## Evidence
-- internal/logic/maintenance.go:121-129 — Redis methods hard-disabled
-- internal/logic/maintenance.go:131-146 — GetUsers with hard-coded LIMIT 100
-- internal/logic/maintenance.go:154-181 — stats queries; Redis-keys comment at line 168; active-matches query at line 170
-- internal/logic/maintenance.go:184-211 — UploadMatchResult; INSERT fixed on 2026-11-04 (commit e833eb9, see entry 0007); previously referenced a nonexistent `score_delta` column and omitted NOT NULL `started_at`/`finished_at`
-- internal/models/models.go:52-61 — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
-- frontend/src/components/RedisBrowser.tsx:29-47 — UI still calls the disabled backend
-- frontend/src/components/Dashboard.tsx:19-23 — three stat cards including always-zero Redis Keys
-- frontend/src/components/MatchManager.tsx:18-25, 33-70 — form fields and submit path
-- MatchCoreArena-Server migrate/migrations/baseline.sql:58-76 — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0 (lines 61-62); `started_at`/`finished_at` NOT NULL without defaults (lines 70-71) — schema state since server commit eff1784 (2026-11-04)
-- MatchCoreArena-Server migrate/migrations/baseline.sql:7-18 — users schema (columns referenced by GetUsers do exist)
+- internal/logic/maintenance.go::GetRedisKeys — Redis methods hard-disabled
+- internal/logic/maintenance.go::GetUsers — GetUsers with hard-coded LIMIT 100
+- internal/logic/maintenance.go::GetSystemStats, internal/logic/maintenance.go::finished_at — stats queries; Redis-keys comment and active-matches query inside GetSystemStats
+- internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult; INSERT fixed on 2026-11-04 (commit e833eb9, see entry 0007); the pre-fix statement (internal/logic/maintenance.go:L184-L211 @ 167ddd72f878fefec5a597d787d67b2874b8fdd6) referenced a nonexistent `score_delta` column and omitted NOT NULL `started_at`/`finished_at`
+- internal/models/models.go::MatchResult — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
+- frontend/src/components/RedisBrowser.tsx::GetRedisKeys — UI still calls the disabled backend
+- frontend/src/components/Dashboard.tsx::redis_keys — three stat cards including always-zero Redis Keys
+- frontend/src/components/MatchManager.tsx::match_id — form fields and submit path
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults — schema state since server commit eff1784 (2026-11-04)
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)
 - commit b7430052b2dc95eb82885c61fafacf7207a14f13 — HEAD at the time of this inventory
 - commit e833eb9 — 2026-11-04 fix of the upload INSERT (see entry 0007)

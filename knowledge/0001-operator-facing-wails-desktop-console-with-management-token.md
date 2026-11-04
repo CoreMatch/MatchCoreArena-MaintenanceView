@@ -51,16 +51,16 @@ The tool is an operator-only console, and its identity model reflects that:
     benefits from them and documents none of that contract itself.
 
 ## Evidence
-- main.go:14-35 — Wails app options, `Title: "MCA-Maintenance"`
-- wails.json:3-4 — app/output name "MCA-Maintenance"
-- config.yaml:2-3 — `upstream_url` and `management_token` placeholder
-- internal/logic/maintenance.go:73-76 — Bearer header set from `ManagementToken`
-- frontend/src/App.tsx:51-58 — admin-only menu items; frontend/src/App.tsx:81-86 — "MCA Maintenance Panel" header
-- frontend/src/components/ConfigManager.tsx:126-134 — token edited as a password field
-- MatchCoreArena-Server internal/auth/verifier.go:47-54 — management token maps to UID -1, scopes ["maintenance"]
-- MatchCoreArena-Server api/middleware/auth.go:103-113 — `HasScope`: maintenance implies all scopes
-- MatchCoreArena-Server api/handler/maintenance.go:26-31 — ExecuteSQL requires the maintenance scope
-- MatchCoreArena-Server api/router.go:93 — `api.POST("/maintenance/sql", ...)` inside the authenticated group
-- .trae/rules/docs.md:1-5 — HA-Contract is the sole documentation authority
+- main.go::main — Wails app options, `Title: "MCA-Maintenance"`
+- wails.json (field: outputfilename) — app/output name "MCA-Maintenance"
+- config.yaml (field: upstream_url), config.yaml (field: management_token) — `upstream_url` and `management_token` placeholder
+- internal/logic/maintenance.go::ManagementToken — Bearer header set from `ManagementToken`
+- frontend/src/App.tsx::menuItems — admin-only menu items; frontend/src/App.tsx::Panel — "MCA Maintenance Panel" header
+- frontend/src/components/ConfigManager.tsx::password — token edited as a password field
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/auth/verifier.go::Verify — management token maps to UID -1, scopes ["maintenance"]
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/middleware/auth.go::HasScope — `HasScope`: maintenance implies all scopes
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/maintenance.go::ExecuteSQL — ExecuteSQL requires the maintenance scope
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/router.go::Register — `api.POST("/maintenance/sql", ...)` inside the authenticated group
+- .trae/rules/docs.md::HA-Contract — HA-Contract is the sole documentation authority
 - commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool
 - commit 00fb0523ae3b91379469bbc4f34c6728db03e876 — feat(maintenance): add upstream API and token auth

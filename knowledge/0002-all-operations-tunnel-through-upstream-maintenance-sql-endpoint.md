@@ -48,13 +48,13 @@ return errors unconditionally.
     config fields are vestigial.
 
 ## Evidence
-- internal/logic/maintenance.go:31-54 — db/redis clients initialized but unused (comment at line 32)
-- internal/logic/maintenance.go:97-114 — `executeSQL` helper posting `{"sql": ...}` to `/api/maintenance/sql`
-- internal/logic/maintenance.go:121-129 — Redis methods hard-disabled with error returns
-- internal/logic/maintenance.go:131-152 — GetUsers / UpdateUserRankScore SQL
-- internal/logic/maintenance.go:154-211 — GetSystemStats / UploadMatchResult SQL
-- HA-Contract docs/api/openapi/matchcorearena-business.yaml:807-858 — contract for `/api/maintenance/sql`
-- MatchCoreArena-Server internal/service/maintenance.go:26-46 — server executes raw SQL (Query, fallback Exec)
+- internal/logic/maintenance.go::NewMaintenanceService — db/redis clients initialized but unused (comment inside NewMaintenanceService)
+- internal/logic/maintenance.go::executeSQL — `executeSQL` helper posting `{"sql": ...}` to `/api/maintenance/sql`
+- internal/logic/maintenance.go::GetRedisKeys — Redis methods hard-disabled with error returns
+- internal/logic/maintenance.go::GetUsers, internal/logic/maintenance.go::UpdateUserRankScore — GetUsers / UpdateUserRankScore SQL
+- internal/logic/maintenance.go::GetSystemStats, internal/logic/maintenance.go::UploadMatchResult — GetSystemStats / UploadMatchResult SQL
+- /home/lnb/Desktop/HA/HA-Contract/docs/api/openapi/matchcorearena-business.yaml (field: /api/maintenance/sql) — contract for `/api/maintenance/sql`
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/maintenance.go::ExecuteSQL — server executes raw SQL (Query, fallback Exec)
 - commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — original direct MySQL/Redis implementation
 - commit 00fb0523ae3b91379469bbc4f34c6728db03e876 — interim upstream-API version (ranking-API user list, disabled score updates)
 - commit d71ac1f8152a98bad47278d8015b4e909710f325 — feat(maintenance): implement sql-based maintenance operations (also renamed `api_token` → `management_token`)
