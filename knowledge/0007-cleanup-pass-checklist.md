@@ -76,8 +76,8 @@ repository.
 
 ## Evidence
 - `e833eb9` fix(match-upload): align manual upload INSERT with the real matches schema
-- `internal/logic/maintenance.go:184-210` (UploadMatchResult after the fix)
-- MatchCoreArena-Server `migrate/migrations/baseline.sql:57-94` (matches
+- `internal/logic/maintenance.go::UploadMatchResult` (UploadMatchResult after the fix)
+- MatchCoreArena-Server `/home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches` (matches
   schema used as the reference; read-only cross-repo check)
 - MariaDB 11.8.8 session 2026-11-04: fixed INSERT created a row; pre-fix
   INSERT returned `ERROR 1054 (42S22) Unknown column 'score_delta' in
