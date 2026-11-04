@@ -18,6 +18,7 @@ conflicts with HA-Contract, fix the entry, not the contract.
 | [0004](0004-feature-completeness-inventory-working-paths-and-dead-ends.md) | Completeness Inventory: Working Paths, Dead Ends, and a Broken Match-Upload INSERT | Accepted | User management, stats (users), rating simulation and config management work; Redis browsing is hard-disabled, two dashboard stats are always 0, and the manual match-upload INSERT cannot succeed against the real schema. |
 | [0005](0005-yaml-config-with-ui-edit-backup-history-and-restore.md) | YAML Config Managed In-App with Timestamped Backups, History Listing, and Restore | Accepted | config.yaml is editable from the Config Manager; every save writes a timestamped backup into config_history/, and any backup can be restored from the UI. |
 | [0006](0006-wails-go-react-mui-stack-and-repository-layout.md) | Wails v2 + Go Backend with React 19/MUI Frontend; HA-Contract Vendored as a Local Symlink | Accepted | A Wails v2 desktop app (Go 1.25, React 19, MUI 9, Vite 7) with an app.go → internal/{config,logic,models} layout; HA-Contract is a committed symlink to an absolute local path. |
+| [0007](0007-cleanup-pass-checklist.md) | Cleanup Pass Checklist: Fixed Items and Pending Decisions | Accepted | 2026-11-04 low-risk cleanup: the manual match-upload INSERT now executes against the real schema (verified on MariaDB strict mode); updates entry 0004's broken-INSERT finding; design-level issues listed as pending author decisions. |
 
 ## Maintenance
 
