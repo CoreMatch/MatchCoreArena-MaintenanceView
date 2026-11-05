@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 The tool must work from any network location that can reach the upstream, so
 it cannot rely on direct access to the service's storage. All data operations

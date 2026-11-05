@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-11-04
-
 ## Context
 This entry records why the manual match-upload statements are shaped the way
 they are, and lists the design-level issues that are open and need author

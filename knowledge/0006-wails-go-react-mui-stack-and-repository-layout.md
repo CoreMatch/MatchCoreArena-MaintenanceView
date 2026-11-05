@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 The project needed an operator UI with direct access to Go-side HTTP and
 config logic, distributable to individual operators without hosting anything.

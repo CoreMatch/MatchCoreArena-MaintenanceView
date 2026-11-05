@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 MatchCoreArena-MaintenanceView exists to operate and administer the
 MatchCoreArena service (MatchCoreArena-Server): inspect users, correct rank

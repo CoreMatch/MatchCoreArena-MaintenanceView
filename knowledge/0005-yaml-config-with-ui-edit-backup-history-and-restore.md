@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 The tool's behavior depends on environment-specific values: the upstream URL,
 the management token, and (vestigially) the MySQL DSN and Redis address. A
