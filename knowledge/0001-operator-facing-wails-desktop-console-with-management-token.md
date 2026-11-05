@@ -62,5 +62,3 @@ The tool is an operator-only console, and its identity model reflects that:
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/maintenance.go::ExecuteSQL — ExecuteSQL requires the maintenance scope
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/api/router.go::Register — `api.POST("/maintenance/sql", ...)` inside the authenticated group
 - .trae/rules/docs.md::HA-Contract — HA-Contract is the sole documentation authority
-- commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool
-- commit 00fb0523ae3b91379469bbc4f34c6728db03e876 — feat(maintenance): add upstream API and token auth
