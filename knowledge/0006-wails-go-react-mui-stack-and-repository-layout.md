@@ -9,8 +9,6 @@ Accepted
 ## Context
 The project needed an operator UI with direct access to Go-side HTTP and
 config logic, distributable to individual operators without hosting anything.
-It was initialized from the official Wails React-TS template, which still
-shows in the untouched root README.
 
 ## Decision
 - Wails v2 (v2.15.0) desktop app: Go module `MCA-Maintenance` on Go 1.25.0.
@@ -55,6 +53,3 @@ shows in the untouched root README.
 - .trae/rules/docs.md::HA-Contract — HA-Contract as documentation authority
 - README.md::About — stock Wails template README
 - git ls-tree HEAD — `HA-Contract` mode 120000, target `/home/lnb/Desktop/HA/HA-Contract/`
-- commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool
-- commit a0f65e13f08c2809501dd8e55c45a7bcf036dbf9 — refactor(frontend): modernize mui component syntax
-- commit 805f4c520070add69b05ae63f52d1859af0bb940 — build(wails): update config and runtime file perms

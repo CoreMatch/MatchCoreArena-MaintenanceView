@@ -8,11 +8,9 @@ Accepted
 
 ## Context
 The tool's behavior depends on environment-specific values: the upstream URL,
-the management token, and (vestigially) the MySQL DSN and Redis address. At
-first these could only be edited by hand in `config.yaml`, and a bad edit
-could break the tool's connectivity with no way to roll back. Commit 8fbb1d9
-introduced YAML loading with built-in defaults; commit b743005 added full
-in-app management.
+the management token, and (vestigially) the MySQL DSN and Redis address. A
+bad edit of `config.yaml` can break the tool's connectivity, so every save
+needs a backup and a way to roll back from within the app.
 
 ## Decision
 - Config is a single YAML file (`config.yaml`) loaded once at startup; if the
@@ -59,6 +57,3 @@ in-app management.
 - frontend/src/components/ConfigManager.tsx::ConfigManager — editor, save, history table, restore
 - config.yaml (field: management_token) — committed config with placeholder token
 - .gitignore::build — config.yaml and config_history/ are not ignored
-- commit 8fbb1d9585517c75f6e0a74f07e6a5f4ace39fd1 — feat: add yaml config support and refactor service to use config
-- commit d71ac1f8152a98bad47278d8015b4e909710f325 — renamed `api_token` to `management_token`
-- commit b7430052b2dc95eb82885c61fafacf7207a14f13 — feat(config): add config management with backup, history and restore

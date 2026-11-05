@@ -33,7 +33,7 @@ config.
 
 ## Consequences
 - Operators can explore what-if deltas offline, and the numbers match the
-  server implementation line-for-line at the time of writing.
+  server implementation line-for-line.
 - Costs and limitations:
   - Two hand-maintained copies of the algorithm exist in two repos, with no
     shared package and no cross-repo test; a future change to server constants
@@ -59,4 +59,3 @@ config.
 - frontend/src/components/RatingSimulator.tsx::SimulateRating — manual input state and local simulate call
 - frontend/src/components/RatingSimulator.tsx::expected_win_rate — result breakdown display
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::PlacementWinsThreshold, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateEloExpected, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetKFactor, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetSurvivalWeight, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateTeamAverageRating, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::GetStreakWeight, /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/rating/rating.go::CalculateDelta — the server-side source the copy mirrors
-- commit aa7f88ca711292bfdedc1e3082977b68388e63b3 — feat: initialize MCA maintenance desktop tool (introduced the simulator)

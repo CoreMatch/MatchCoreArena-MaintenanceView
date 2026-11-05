@@ -1,35 +1,38 @@
-# 0007. Cleanup Pass Checklist: Fixed Items and Pending Decisions
+# 0007. Manual Upload Schema Alignment and Pending Design Decisions
 
 ## Status
 Accepted
 
 ## Date
-2026-11-04 (cleanup commits listed in Evidence)
+2026-11-04
 
 ## Context
-Per the author's 2026-11 instruction, the three MatchCoreArena repositories had
-drifted and needed a low-risk cleanup pass: fix only items with a single correct
-answer (statements that can never execute, doc-vs-code mismatches), and defer
-everything that requires a design decision. This entry is the checklist for this
-repository.
+This entry records why the manual match-upload statements are shaped the way
+they are, and lists the design-level issues that are open and need author
+decisions. Items with a single correct answer (statements that can never
+execute, doc-vs-code mismatches) are fixed as found and need no entry.
 
 ## Decision
 
-### Fixed in this pass
+### Manual match-upload INSERT
 
-1. Manual match upload INSERT aligned with the real schema (commit
-   `e833eb9`): `UploadMatchResult` referenced a `score_delta` column that
-   does not exist in the `matches` table (`ERROR 1054 Unknown column
-   'score_delta'`, reproduced on MariaDB 11.8.8) and omitted
-   `started_at`/`finished_at`, which are `NOT NULL` without defaults. The
-   statement now uses the column set of the MatchCoreArena-Server baseline
-   schema: `score_delta` is dropped (the score change is already applied to
-   `users.rank_score` by the preceding UPDATE) and both NOT NULL timestamps
-   are set to `MatchTime`, the only timestamp the upload provides. Verified
-   by executing the exact statement against a local MariaDB running the
-   current baseline schema in strict mode.
+`UploadMatchResult` executes one `UPDATE users` — applying the score delta
+and the win increment — followed by one `INSERT INTO matches` that uses the
+column set of the MatchCoreArena-Server baseline schema:
 
-### Not fixed — requires author decision
+- `score_delta` is not written to `matches`: the table has no such column,
+  and the score change is already applied to `users.rank_score` by the
+  preceding UPDATE.
+- Both NOT NULL timestamps, `started_at` and `finished_at`, are set to
+  `MatchTime`, the only timestamp the upload provides.
+- `match_type` is fixed to `'1v1'` and `winner_uid` to the uploading
+  player's UID.
+
+The statement is verified by executing it against a local MariaDB in strict
+mode running the current baseline schema; the INSERT and the preceding users
+UPDATE both succeed.
+
+### Open items — requires author decision
 
 1. **Manual upload semantics beyond executability**: the INSERT writes
    `winner_uid = UID` unconditionally (even when `is_winner` is false); the
@@ -49,8 +52,8 @@ repository.
    source; `ActiveMatches` counts `matches WHERE finished_at IS NULL`, but
    `finished_at` is NOT NULL in the schema, so the count is always 0. The
    definition of "active match" needs a decision.
-5. **No tests in the repository**: none were added in this pass (author's
-   instruction: do not add a test framework here).
+5. **No tests in the repository**: adding a test framework is deferred
+   (explicitly by the author).
 6. **README is still the default Wails template text**: rewriting it is
    content creation, deferred.
 7. **`config.yaml` committed with a placeholder `management_token`** and not
@@ -64,21 +67,10 @@ repository.
     comment "in case they are needed later"; whether to remove them is open.
 
 ## Consequences
-- Verified 2026-11-04 after the fix: `go build ./...` and `go vet ./...`
-  pass; the repository contains no Go tests. Frontend `npm run build`
-  (tsc + vite) passes.
-- SQL verification level: full execution against a local MariaDB 11.8.8 in
-  strict mode using the current MatchCoreArena-Server baseline schema. The
-  fixed INSERT and the preceding users UPDATE both succeed; the pre-fix
-  INSERT fails with `ERROR 1054 (42S22): Unknown column 'score_delta'`.
-- Pending items above remain open; each needs a semantic or design choice
-  that this pass was explicitly not allowed to make.
+- The upload path executes end to end against the baseline schema.
+- The open items above each need a semantic or design choice; they stay
+  listed here until decided.
 
 ## Evidence
-- `e833eb9` fix(match-upload): align manual upload INSERT with the real matches schema
-- `internal/logic/maintenance.go::UploadMatchResult` (UploadMatchResult after the fix)
-- MatchCoreArena-Server `/home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches` (matches
-  schema used as the reference; read-only cross-repo check)
-- MariaDB 11.8.8 session 2026-11-04: fixed INSERT created a row; pre-fix
-  INSERT returned `ERROR 1054 (42S22) Unknown column 'score_delta' in
-  'INSERT INTO'`.
+- internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult with the baseline-schema INSERT
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema used as the reference (read-only cross-repo check)
