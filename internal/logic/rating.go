@@ -1,8 +1,8 @@
 package logic
 
 import (
-	"math"
 	"MCA-Maintenance/internal/models"
+	"math"
 )
 
 const (
@@ -89,7 +89,7 @@ func SimulateRating(input models.RatingSimInput) models.RatingSimResult {
 	}
 
 	delta := k * (s - e) * wRound * wStreak * wPerf
-	
+
 	return models.RatingSimResult{
 		Delta:           int(math.Round(delta)),
 		ExpectedWinRate: e,
