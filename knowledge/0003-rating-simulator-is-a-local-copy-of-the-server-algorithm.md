@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 Operators want to predict rank-score changes before correcting them manually,
 and to understand how the K-factor and the various weights behave. The

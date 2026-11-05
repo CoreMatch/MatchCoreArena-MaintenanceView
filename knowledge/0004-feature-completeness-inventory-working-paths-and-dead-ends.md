@@ -3,9 +3,6 @@
 ## Status
 Accepted
 
-## Date
-2026-09-19
-
 ## Context
 Anyone operating this console needs an honest inventory of which pages
 actually work and which are dead or broken, so this entry records the
