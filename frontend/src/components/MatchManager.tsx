@@ -13,6 +13,7 @@ import {
   Snackbar 
 } from '@mui/material';
 import { UploadMatchResult } from '../../wailsjs/go/main/App';
+import { t } from '../i18n';
 
 export default function MatchManager() {
   const [formData, setFormData] = useState({
@@ -47,7 +48,7 @@ export default function MatchManager() {
       await UploadMatchResult(result as any);
       setNotification({
         open: true,
-        message: 'Match result uploaded successfully!',
+        message: t().match.uploadSuccess,
         severity: 'success'
       });
       
@@ -63,7 +64,7 @@ export default function MatchManager() {
     } catch (err) {
       setNotification({
         open: true,
-        message: `Failed to upload match result: ${err}`,
+        message: `${t().match.uploadFailed}: ${err}`,
         severity: 'error'
       });
     }
@@ -80,13 +81,13 @@ export default function MatchManager() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Match Management
+        {t().match.title}
       </Typography>
 
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            Manual Match Result Upload
+            {t().match.manualUpload}
           </Typography>
           
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
@@ -94,7 +95,7 @@ export default function MatchManager() {
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
-                  label="User UID"
+                  label={t().match.uid}
                   name="uid"
                   type="number"
                   value={formData.uid}
@@ -105,7 +106,7 @@ export default function MatchManager() {
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
-                  label="Match ID"
+                  label={t().match.matchId}
                   name="match_id"
                   value={formData.match_id}
                   onChange={handleChange}
@@ -115,7 +116,7 @@ export default function MatchManager() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
-                  label="Rank"
+                  label={t().match.rank}
                   name="rank"
                   type="number"
                   value={formData.rank}
@@ -126,7 +127,7 @@ export default function MatchManager() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
-                  label="Score Delta"
+                  label={t().match.scoreDelta}
                   name="score_delta"
                   type="number"
                   value={formData.score_delta}
@@ -137,7 +138,7 @@ export default function MatchManager() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
-                  label="Survivor Count"
+                  label={t().match.survivorCount}
                   name="survivor_count"
                   type="number"
                   value={formData.survivor_count}
@@ -155,7 +156,7 @@ export default function MatchManager() {
                       color="primary"
                     />
                   }
-                  label="Is Winner"
+                  label={t().match.isWinner}
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
@@ -165,7 +166,7 @@ export default function MatchManager() {
                   color="primary"
                   size="large"
                 >
-                  Upload Result
+                  {t().match.uploadResult}
                 </Button>
               </Grid>
             </Grid>

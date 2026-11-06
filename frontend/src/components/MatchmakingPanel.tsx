@@ -88,7 +88,7 @@ export default function MatchmakingPanel() {
     try {
       const entry = await JoinMatchmaking(mode.trim(), partyMembers);
       setMessage(
-        `${t('matchmaking.joined')}: ${entry.match_type} (${t('matchmaking.rating')} ${entry.rank_score})`,
+        `${t().matchmaking.joined}: ${entry.match_type} (${t().matchmaking.rating} ${entry.rank_score})`,
       );
       await refreshStatus();
     } catch (err) {
@@ -104,7 +104,7 @@ export default function MatchmakingPanel() {
     setMessage(null);
     try {
       await LeaveMatchmaking();
-      setMessage(t('matchmaking.left'));
+      setMessage(t().matchmaking.left);
       await refreshStatus();
     } catch (err) {
       setError(errMsg(err));
@@ -132,30 +132,30 @@ export default function MatchmakingPanel() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        {t('matchmaking.title')}
+        {t().matchmaking.title}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('matchmaking.intro')}
+        {t().matchmaking.intro}
       </Typography>
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
-              label={t('matchmaking.mode')}
+              label={t().matchmaking.mode}
               size="small"
               value={mode}
               onChange={(e) => setMode(e.target.value)}
             />
             <Button onClick={joinQueue} disabled={busy} variant="contained">
               {partyMembers.length > 0
-                ? `${t('matchmaking.party.queueAs')} (${partyMembers.length})`
-                : t('matchmaking.join')}
+                ? `${t().matchmaking.partyQueueAs} (${partyMembers.length})`
+                : t().matchmaking.join}
             </Button>
             <Button onClick={leaveQueue} disabled={busy} variant="outlined">
-              {t('matchmaking.leave')}
+              {t().matchmaking.leave}
             </Button>
-            <IconButton onClick={() => refreshStatus(false)} aria-label={t('matchmaking.refresh')}>
+            <IconButton onClick={() => refreshStatus(false)} aria-label={t().matchmaking.refresh}>
               <RefreshIcon />
             </IconButton>
           </Stack>
@@ -176,45 +176,45 @@ export default function MatchmakingPanel() {
             <Paper sx={{ p: 2, mt: 2 }}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                 <Chip
-                  label={status.in_queue ? t('matchmaking.inQueue') : t('matchmaking.notInQueue')}
+                  label={status.in_queue ? t().matchmaking.inQueue : t().matchmaking.notInQueue}
                   size="small"
                   color={status.in_queue ? 'warning' : 'default'}
                 />
                 {status.queue_entry && (
                   <Typography variant="body2" color="text.secondary">
-                    {t('matchmaking.modeLabel')} {status.queue_entry.match_type} ·{' '}
-                    {t('matchmaking.rating')} {status.queue_entry.rank_score}
+                    {t().matchmaking.modeLabel} {status.queue_entry.match_type} ·{' '}
+                    {t().matchmaking.rating} {status.queue_entry.rank_score}
                     {waiting !== '' && (
                       <>
                         {' '}
-                        · {t('matchmaking.waiting')}: {waiting}
+                        · {t().matchmaking.waiting}: {waiting}
                       </>
                     )}
                   </Typography>
                 )}
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-                  {t('matchmaking.autoRefresh')}
+                  {t().matchmaking.autoRefresh}
                 </Typography>
               </Stack>
 
               <Divider sx={{ my: 1 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                {t('matchmaking.recentGroups')}
+                {t().matchmaking.recentGroups}
               </Typography>
               {!status.recent_groups || status.recent_groups.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  {t('matchmaking.noGroups')}
+                  {t().matchmaking.noGroups}
                 </Typography>
               ) : (
                 status.recent_groups.map((g) => (
                   <Paper key={g.group_id} variant="outlined" sx={{ p: 1.5, mb: 1 }}>
                     <Typography variant="body2">
-                      {t('matchmaking.group')} #{g.group_id} · {g.match_type} · {t('matchmaking.formedAt')}{' '}
+                      {t().matchmaking.group} #{g.group_id} · {g.match_type} · {t().matchmaking.formedAt}{' '}
                       {g.formed_at}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {(g.members || [])
-                        .map((m) => `${t('table.team')} ${m.team_id}: uid ${m.uid} (${m.rank_score})`)
+                        .map((m) => `${t().table.team} ${m.team_id}: uid ${m.uid} (${m.rank_score})`)
                         .join('  |  ')}
                     </Typography>
                   </Paper>
@@ -229,19 +229,19 @@ export default function MatchmakingPanel() {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('matchmaking.party.title')}
+            {t().matchmaking.partyTitle}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('matchmaking.party.note')}
+            {t().matchmaking.partyNote}
           </Typography>
 
           <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
-              label={t('matchmaking.party.placeholder')}
+              label={t().matchmaking.partyPlaceholder}
               size="small"
               sx={{ minWidth: 320 }}
               error={partyInputError}
-              helperText={partyInputError ? t('matchmaking.party.invalidUuid') : ''}
+              helperText={partyInputError ? t().matchmaking.partyInvalidUuid : ''}
               value={partyInput}
               onChange={(e) => {
                 setPartyInput(e.target.value);
@@ -252,10 +252,10 @@ export default function MatchmakingPanel() {
               }}
             />
             <Button startIcon={<AddIcon />} onClick={addPartyMember} variant="outlined">
-              {t('matchmaking.party.add')}
+              {t().matchmaking.partyAdd}
             </Button>
             <Typography variant="body2" color="text.secondary">
-              {t('matchmaking.party.size')}: {partyMembers.length}
+              {t().matchmaking.partySize}: {partyMembers.length}
             </Typography>
           </Stack>
 

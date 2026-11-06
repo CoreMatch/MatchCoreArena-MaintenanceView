@@ -52,14 +52,14 @@ function SettlementTable({ match }: { match: models.Match }) {
   return (
     <Box>
       <Typography variant="body2" sx={{ mb: 1 }}>
-        {t('browser.detail.match')} #{match.id} · {match.match_type} · {t('reporter.source')}={match.source}
-        {match.map_name ? ` · ${t('browser.filter.map')}=${match.map_name}` : ''}
-        {match.game_id ? ` · ${t('table.gameId')}=${match.game_id}` : ''}
+        {t().browser.detailMatch} #{match.id} · {match.match_type} · {t().reporter.source}={match.source}
+        {match.map_name ? ` · ${t().browser.filterMap}=${match.map_name}` : ''}
+        {match.game_id ? ` · ${t().table.gameId}=${match.game_id}` : ''}
         {match.winner_team_id
-          ? ` · ${t('table.winner')}=${match.winner_team_id}`
-          : ` · ${t('table.winner')}=${t('result.draw')}`}
+          ? ` · ${t().table.winner}=${match.winner_team_id}`
+          : ` · ${t().table.winner}=${t().result.draw}`}
         {' · '}
-        {t('table.finishedAt')}: {match.finished_at}
+        {t().table.finishedAt}: {match.finished_at}
       </Typography>
       {match.participants && match.participants.length > 0 ? (
         <TableContainer component={Paper}>
@@ -67,12 +67,12 @@ function SettlementTable({ match }: { match: models.Match }) {
             <TableHead>
               <TableRow>
                 {[
-                  t('table.uid'),
-                  t('table.team'),
-                  t('table.result'),
-                  t('table.before'),
-                  t('table.delta'),
-                  t('table.after'),
+                  t().table.uid,
+                  t().table.team,
+                  t().table.result,
+                  t().table.before,
+                  t().table.delta,
+                  t().table.after,
                 ].map((h) => (
                   <TableCell key={h}>{h}</TableCell>
                 ))}
@@ -85,7 +85,7 @@ function SettlementTable({ match }: { match: models.Match }) {
                   <TableCell>{p.team_id}</TableCell>
                   <TableCell>
                     <Chip
-                      label={p.is_winner ? t('result.win') : p.is_draw ? t('result.draw') : t('result.lose')}
+                      label={p.is_winner ? t().result.win : p.is_draw ? t().result.draw : t().result.lose}
                       size="small"
                       color={p.is_winner ? 'success' : p.is_draw ? 'default' : 'error'}
                     />
@@ -103,7 +103,7 @@ function SettlementTable({ match }: { match: models.Match }) {
         </TableContainer>
       ) : (
         <Typography variant="body2" color="text.secondary">
-          {t('reporter.noParticipants')}
+          {t().reporter.noParticipants}
         </Typography>
       )}
     </Box>
@@ -142,7 +142,7 @@ export default function MatchBrowser() {
     try {
       const uidNum = uidText.trim() === '' ? 0 : Number(uidText);
       if (uidText.trim() !== '' && (!Number.isFinite(uidNum) || uidNum <= 0)) {
-        throw new Error(t('rankings.history.invalidUid'));
+        throw new Error(t().rankings.historyInvalidUid);
       }
       const q = new models.MatchListQuery({
         source: source.trim(),
@@ -180,7 +180,7 @@ export default function MatchBrowser() {
   const lookup = async () => {
     const id = lookupId.trim();
     if (id === '') {
-      setLookupError(t('browser.lookup.empty'));
+      setLookupError(t().browser.lookupEmpty);
       return;
     }
     setLookupLoading(true);
@@ -214,62 +214,62 @@ export default function MatchBrowser() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        {t('browser.title')}
+        {t().browser.title}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('browser.intro')}
+        {t().browser.intro}
       </Typography>
 
       {/* global list */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('browser.list.title')}
+            {t().browser.listTitle}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('browser.list.intro')}
+            {t().browser.listIntro}
           </Typography>
 
           <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
             <TextField
-              label={t('browser.filter.source')}
+              label={t().browser.filterSource}
               size="small"
               value={source}
               onChange={(e) => setSource(e.target.value)}
             />
             <TextField
-              label={t('browser.filter.map')}
+              label={t().browser.filterMap}
               size="small"
               value={mapName}
               onChange={(e) => setMapName(e.target.value)}
             />
             <TextField
-              label={t('browser.filter.gameId')}
+              label={t().browser.filterGameId}
               size="small"
               value={gameIdFilter}
               onChange={(e) => setGameIdFilter(e.target.value)}
             />
             <TextField
-              label={t('browser.filter.uid')}
+              label={t().browser.filterUid}
               size="small"
               type="number"
               value={uidText}
               onChange={(e) => setUidText(e.target.value)}
             />
             <TextField
-              label={t('browser.filter.from')}
+              label={t().browser.filterFrom}
               size="small"
               value={finishedFrom}
               onChange={(e) => setFinishedFrom(e.target.value)}
             />
             <TextField
-              label={t('browser.filter.to')}
+              label={t().browser.filterTo}
               size="small"
               value={finishedTo}
               onChange={(e) => setFinishedTo(e.target.value)}
             />
             <TextField
-              label={t('browser.pageSize')}
+              label={t().browser.pageSize}
               size="small"
               type="number"
               sx={{ width: 110 }}
@@ -282,7 +282,7 @@ export default function MatchBrowser() {
               disabled={listLoading}
               variant="contained"
             >
-              {listLoading ? t('browser.loading') : t('browser.load')}
+              {listLoading ? t().browser.loading : t().browser.load}
             </Button>
           </Stack>
 
@@ -292,7 +292,7 @@ export default function MatchBrowser() {
             <Box>
               {rows.length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {t('browser.empty')}
+                  {t().browser.empty}
                 </Typography>
               ) : (
                 <TableContainer component={Paper} sx={{ mb: 1 }}>
@@ -301,12 +301,12 @@ export default function MatchBrowser() {
                       <TableRow>
                         {[
                           'ID',
-                          t('table.type'),
-                          t('table.sourceCol'),
-                          t('browser.filter.map'),
-                          t('table.gameId'),
-                          t('table.winner'),
-                          t('table.finishedAt'),
+                          t().table.type,
+                          t().table.sourceCol,
+                          t().browser.filterMap,
+                          t().table.gameId,
+                          t().table.winner,
+                          t().table.finishedAt,
                         ].map((h) => (
                           <TableCell key={h}>{h}</TableCell>
                         ))}
@@ -326,7 +326,7 @@ export default function MatchBrowser() {
                           <TableCell>{m.source}</TableCell>
                           <TableCell>{m.map_name || '-'}</TableCell>
                           <TableCell sx={{ fontFamily: 'monospace' }}>{m.game_id || '-'}</TableCell>
-                          <TableCell>{m.winner_team_id || t('result.draw')}</TableCell>
+                          <TableCell>{m.winner_team_id || t().result.draw}</TableCell>
                           <TableCell>{m.finished_at}</TableCell>
                         </TableRow>
                       ))}
@@ -340,7 +340,7 @@ export default function MatchBrowser() {
                   <PrevIcon />
                 </IconButton>
                 <Typography variant="body2" color="text.secondary">
-                  {t('browser.page')} {pageNum}
+                  {t().browser.page} {pageNum}
                 </Typography>
                 <IconButton size="small" disabled={!nextEnabled || listLoading} onClick={() => queryPage(pageNum + 1)}>
                   <NextIcon />
@@ -355,14 +355,14 @@ export default function MatchBrowser() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('browser.lookup.title')}
+            {t().browser.lookupTitle}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('browser.lookup.intro')}
+            {t().browser.lookupIntro}
           </Typography>
           <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
-              label={t('table.gameId')}
+              label={t().table.gameId}
               size="small"
               sx={{ minWidth: 320 }}
               value={lookupId}
@@ -377,7 +377,7 @@ export default function MatchBrowser() {
               disabled={lookupLoading}
               variant="contained"
             >
-              {lookupLoading ? t('browser.loading') : t('browser.lookup.button')}
+              {lookupLoading ? t().browser.loading : t().browser.lookupButton}
             </Button>
           </Stack>
           {lookupError && (
@@ -392,13 +392,13 @@ export default function MatchBrowser() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('browser.detail.title')}
+            {t().browser.detailTitle}
           </Typography>
           {selected ? (
             <SettlementTable match={selected} />
           ) : (
             <Typography variant="body2" color="text.secondary">
-              {t('browser.detail.hint')}
+              {t().browser.detailHint}
             </Typography>
           )}
         </CardContent>
@@ -409,16 +409,16 @@ export default function MatchBrowser() {
         <CardContent>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
             <Typography variant="h6" color="primary" sx={{ flexGrow: 1 }}>
-              {t('browser.rejections.title')}
+              {t().browser.rejectionsTitle}
             </Typography>
-            <Tooltip title={t('browser.rejections.refresh')}>
-              <IconButton size="small" onClick={loadRejections} aria-label={t('browser.rejections.refresh')}>
+            <Tooltip title={t().browser.rejectionsRefresh}>
+              <IconButton size="small" onClick={loadRejections} aria-label={t().browser.rejectionsRefresh}>
                 <RefreshIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
           <Alert severity="info" sx={{ mb: 2 }}>
-            {t('browser.rejections.note')}
+            {t().browser.rejectionsNote}
           </Alert>
 
           {rejectionsError && <Alert severity="error">{rejectionsError}</Alert>}
@@ -426,14 +426,14 @@ export default function MatchBrowser() {
           {rejections &&
             (rejections.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('browser.rejections.empty')}
+                {t().browser.rejectionsEmpty}
               </Typography>
             ) : (
               <TableContainer component={Paper} sx={{ maxHeight: 320 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      {[t('reqlog.time'), t('reqlog.code'), t('table.gameId'), t('table.reason')].map((h) => (
+                      {[t().reqlog.time, t().reqlog.code, t().table.gameId, t().table.reason].map((h) => (
                         <TableCell key={h}>{h}</TableCell>
                       ))}
                     </TableRow>

@@ -62,7 +62,7 @@ export default function RankingsView() {
   const loadHistory = async () => {
     const uid = Number(uidText);
     if (!Number.isFinite(uid) || uid <= 0) {
-      setHistoryError(t('rankings.history.invalidUid'));
+      setHistoryError(t().rankings.historyInvalidUid);
       return;
     }
     setHistoryLoading(true);
@@ -81,17 +81,17 @@ export default function RankingsView() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        {t('rankings.title')}
+        {t().rankings.title}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('rankings.intro')}
+        {t().rankings.intro}
       </Typography>
 
       {/* rankings */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('rankings.top.title')}
+            {t().rankings.topTitle}
           </Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
@@ -101,7 +101,7 @@ export default function RankingsView() {
               onChange={(e) => setRankType(e.target.value)}
             />
             <TextField
-              label={t('rankings.limit')}
+              label={t().rankings.limit}
               size="small"
               type="number"
               value={limit}
@@ -113,7 +113,7 @@ export default function RankingsView() {
               disabled={rankLoading}
               variant="contained"
             >
-              {rankLoading ? t('rankings.top.loading') : t('rankings.top.load')}
+              {rankLoading ? t().rankings.topLoading : t().rankings.topLoad}
             </Button>
           </Stack>
 
@@ -122,7 +122,7 @@ export default function RankingsView() {
           {rankings &&
             (rankings.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('rankings.top.empty')}
+                {t().rankings.topEmpty}
               </Typography>
             ) : (
               <TableContainer component={Paper}>
@@ -130,12 +130,12 @@ export default function RankingsView() {
                   <TableHead>
                     <TableRow>
                       {[
-                        t('table.rank'),
-                        t('table.player'),
-                        t('table.type'),
-                        t('table.score'),
-                        t('table.season'),
-                        t('table.updatedAt'),
+                        t().table.rank,
+                        t().table.player,
+                        t().table.type,
+                        t().table.score,
+                        t().table.season,
+                        t().table.updatedAt,
                       ].map((h) => (
                         <TableCell key={h}>{h}</TableCell>
                       ))}
@@ -165,18 +165,18 @@ export default function RankingsView() {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('rankings.history.title')}
+            {t().rankings.historyTitle}
           </Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
-              label={t('rankings.history.uid')}
+              label={t().rankings.historyUid}
               size="small"
               type="number"
               value={uidText}
               onChange={(e) => setUidText(e.target.value)}
             />
             <TextField
-              label={t('rankings.history.count')}
+              label={t().rankings.historyCount}
               size="small"
               type="number"
               value={historyLimit}
@@ -188,7 +188,7 @@ export default function RankingsView() {
               disabled={historyLoading}
               variant="contained"
             >
-              {historyLoading ? t('rankings.history.loading') : t('rankings.history.load')}
+              {historyLoading ? t().rankings.historyLoading : t().rankings.historyLoad}
             </Button>
           </Stack>
 
@@ -198,7 +198,7 @@ export default function RankingsView() {
             historyUid !== null &&
             (history.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('rankings.history.player')} {historyUid} {t('rankings.history.empty')}
+                {t().rankings.historyPlayer} {historyUid} {t().rankings.historyEmpty}
               </Typography>
             ) : (
               <TableContainer component={Paper}>
@@ -206,15 +206,15 @@ export default function RankingsView() {
                   <TableHead>
                     <TableRow>
                       {[
-                        t('table.match'),
-                        t('table.type'),
-                        t('table.sourceCol'),
-                        t('table.team'),
-                        t('table.result'),
-                        t('table.before'),
-                        t('table.delta'),
-                        t('table.after'),
-                        t('table.time'),
+                        t().table.match,
+                        t().table.type,
+                        t().table.sourceCol,
+                        t().table.team,
+                        t().table.result,
+                        t().table.before,
+                        t().table.delta,
+                        t().table.after,
+                        t().table.time,
                       ].map((h) => (
                         <TableCell key={h}>{h}</TableCell>
                       ))}
@@ -230,7 +230,7 @@ export default function RankingsView() {
                         <TableCell>
                           <Chip
                             label={
-                              row.is_winner ? t('result.win') : row.is_draw ? t('result.draw') : t('result.lose')
+                              row.is_winner ? t().result.win : row.is_draw ? t().result.draw : t().result.lose
                             }
                             size="small"
                             color={row.is_winner ? 'success' : row.is_draw ? 'default' : 'error'}

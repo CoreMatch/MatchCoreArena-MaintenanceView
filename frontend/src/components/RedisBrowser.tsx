@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Delete, Visibility, Search } from '@mui/icons-material';
 import { GetRedisKeys, DeleteRedisKey } from '../../wailsjs/go/main/App';
+import { t } from '../i18n';
 
 export default function RedisBrowser() {
   const [keys, setKeys] = useState<any[]>([]);
@@ -40,7 +41,7 @@ export default function RedisBrowser() {
   }, []);
 
   const handleDelete = async (key: string) => {
-    if (window.confirm(`Delete key ${key}?`)) {
+    if (window.confirm(`${t().redis.confirmDelete} ${key}?`)) {
       await DeleteRedisKey(key);
       fetchKeys();
     }
@@ -54,18 +55,18 @@ export default function RedisBrowser() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Redis Browser
+        {t().redis.title}
       </Typography>
       
       <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
         <TextField 
-          label="Pattern" 
+          label={t().redis.pattern} 
           value={pattern} 
           onChange={(e) => setPattern(e.target.value)}
           size="small"
         />
         <Button variant="contained" onClick={fetchKeys} startIcon={<Search />}>
-          Search
+          {t().redis.search}
         </Button>
       </Box>
 
@@ -73,10 +74,10 @@ export default function RedisBrowser() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Key</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>TTL (s)</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t().redis.key}</TableCell>
+              <TableCell>{t().redis.type}</TableCell>
+              <TableCell>{t().redis.ttl}</TableCell>
+              <TableCell align="right">{t().redis.actions}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -100,9 +101,9 @@ export default function RedisBrowser() {
       </TableContainer>
 
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Key: {selectedKey?.key}</DialogTitle>
+        <DialogTitle>{t().redis.key}: {selectedKey?.key}</DialogTitle>
         <DialogContent>
-          <Typography variant="subtitle2" gutterBottom>Value:</Typography>
+          <Typography variant="subtitle2" gutterBottom>{t().redis.value}</Typography>
           <Box sx={{ 
             p: 2, 
             bgcolor: 'background.default', 
@@ -111,11 +112,11 @@ export default function RedisBrowser() {
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-all'
           }}>
-            {selectedKey?.value || '(Empty or Unsupported Type)'}
+            {selectedKey?.value || t().redis.emptyUnsupported}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Close</Button>
+          <Button onClick={() => setOpen(false)}>{t().redis.close}</Button>
         </DialogActions>
       </Dialog>
     </Box>

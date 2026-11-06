@@ -62,14 +62,14 @@ export default function ConfigManager() {
       await SaveConfig(config);
       setNotification({
         open: true,
-        message: 'Configuration saved and backed up successfully!',
+        message: t().config.saveSuccess,
         severity: 'success'
       });
       loadData();
     } catch (err) {
       setNotification({
         open: true,
-        message: `Failed to save configuration: ${err}`,
+        message: `${t().config.saveFailed}: ${err}`,
         severity: 'error'
       });
     }
@@ -80,14 +80,14 @@ export default function ConfigManager() {
       await RestoreConfig(filename);
       setNotification({
         open: true,
-        message: 'Configuration restored successfully!',
+        message: t().config.restoreSuccess,
         severity: 'success'
       });
       loadData();
     } catch (err) {
       setNotification({
         open: true,
-        message: `Failed to restore configuration: ${err}`,
+        message: `${t().config.restoreFailed}: ${err}`,
         severity: 'error'
       });
     }
@@ -107,7 +107,7 @@ export default function ConfigManager() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Configuration Management
+        {t().config.title}
       </Typography>
 
       <Grid container spacing={3}>
@@ -116,14 +116,14 @@ export default function ConfigManager() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom color="primary">
-                Edit Current Configuration
+                {t().config.editCurrent}
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12 }}>
                     <TextField
                       fullWidth
-                      label="Upstream URL"
+                      label={t().config.upstreamUrl}
                       value={config.upstream_url}
                       onChange={(e) => handleChange('upstream_url', e.target.value)}
                     />
@@ -131,42 +131,42 @@ export default function ConfigManager() {
                   <Grid size={{ xs: 12 }}>
                     <TextField
                       fullWidth
-                      label="Management Token"
+                      label={t().config.managementToken}
                       type="password"
                       value={config.management_token}
                       onChange={(e) => handleChange('management_token', e.target.value)}
                     />
                   </Grid>
                   <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 1 }}>{t('config.mcaSection')}</Divider>
+                    <Divider sx={{ my: 1 }}>{t().config.mcaSection}</Divider>
                   </Grid>
                   <Grid size={{ xs: 12 }}>
                     <TextField
                       fullWidth
-                      label={t('config.reporterToken')}
+                      label={t().config.reporterToken}
                       type="password"
                       value={config.mca?.reporter_token ?? ''}
                       onChange={(e) => handleChange('mca.reporter_token', e.target.value)}
                     />
                   </Grid>
                   <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 1 }}>Database</Divider>
+                    <Divider sx={{ my: 1 }}>{t().config.databaseSection}</Divider>
                   </Grid>
                   <Grid size={{ xs: 12 }}>
                     <TextField
                       fullWidth
-                      label="DSN"
+                      label={t().config.dsn}
                       value={config.database.dsn}
                       onChange={(e) => handleChange('database.dsn', e.target.value)}
                     />
                   </Grid>
                   <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 1 }}>Redis</Divider>
+                    <Divider sx={{ my: 1 }}>{t().config.redisSection}</Divider>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
                     <TextField
                       fullWidth
-                      label="Address"
+                      label={t().config.address}
                       value={config.redis.addr}
                       onChange={(e) => handleChange('redis.addr', e.target.value)}
                     />
@@ -174,7 +174,7 @@ export default function ConfigManager() {
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <TextField
                       fullWidth
-                      label="DB"
+                      label={t().config.db}
                       type="number"
                       value={config.redis.db}
                       onChange={(e) => handleChange('redis.db', parseInt(e.target.value))}
@@ -187,7 +187,7 @@ export default function ConfigManager() {
                       onClick={handleSave}
                       sx={{ mt: 2 }}
                     >
-                      Save & Backup
+                      {t().config.saveBackup}
                     </Button>
                   </Grid>
                 </Grid>
@@ -201,14 +201,14 @@ export default function ConfigManager() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom color="primary">
-                Version History
+                {t().config.versionHistory}
               </Typography>
               <TableContainer component={Paper} sx={{ maxHeight: 400, mt: 2 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Time</TableCell>
-                      <TableCell align="right">Action</TableCell>
+                      <TableCell>{t().config.time}</TableCell>
+                      <TableCell align="right">{t().config.action}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -222,7 +222,7 @@ export default function ConfigManager() {
                             color="secondary" 
                             size="small"
                             onClick={() => handleRestore(item.filename)}
-                            title="Restore this version"
+                            title={t().config.restoreVersion}
                           >
                             <Restore />
                           </IconButton>
@@ -231,7 +231,7 @@ export default function ConfigManager() {
                     ))}
                     {history.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={2} align="center">No history yet</TableCell>
+                        <TableCell colSpan={2} align="center">{t().config.noHistory}</TableCell>
                       </TableRow>
                     )}
                   </TableBody>

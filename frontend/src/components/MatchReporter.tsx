@@ -111,7 +111,7 @@ interface ValidationReport {
 }
 
 function validateTeam(team: TeamForm, isWinner: boolean, messages: string[]): TeamFieldFlags {
-  const label = `${t('validation.teamPrefix')} ${team.team_id || '?'}`;
+  const label = `${t().validation.teamPrefix} ${team.team_id || '?'}`;
   const flags: TeamFieldFlags = {
     teamId: team.team_id.trim() === '',
     counts: false,
@@ -119,36 +119,36 @@ function validateTeam(team: TeamForm, isWinner: boolean, messages: string[]): Te
   };
 
   if (flags.teamId) {
-    messages.push(t('validation.teamIdRequired'));
+    messages.push(t().validation.teamIdRequired);
   }
   if (team.initial_count < 1) {
-    messages.push(`${label}: ${t('validation.initialCount')}`);
+    messages.push(`${label}: ${t().validation.initialCount}`);
     flags.counts = true;
   }
   if (team.alive_count < 0 || team.alive_count > team.initial_count) {
-    messages.push(`${label}: ${t('validation.aliveRange')}`);
+    messages.push(`${label}: ${t().validation.aliveRange}`);
     flags.counts = true;
   }
   if (isWinner && team.alive_count < 1) {
-    messages.push(`${label}: ${t('validation.winnerAlive')}`);
+    messages.push(`${label}: ${t().validation.winnerAlive}`);
     flags.counts = true;
   }
   if (team.members.length > team.initial_count) {
-    messages.push(`${label}: ${t('validation.memberCount')}`);
+    messages.push(`${label}: ${t().validation.memberCount}`);
     flags.counts = true;
   }
 
   team.members.forEach((m, i) => {
     const trimmed = m.uuid.trim();
     if (trimmed === '') {
-      messages.push(`${label} #${i + 1}: ${t('validation.missingUuid')}`);
+      messages.push(`${label} #${i + 1}: ${t().validation.missingUuid}`);
       flags.members[i].uuid = true;
     } else if (!UUID_RE.test(trimmed)) {
-      messages.push(`${label} #${i + 1}: ${t('validation.invalidUuid')}`);
+      messages.push(`${label} #${i + 1}: ${t().validation.invalidUuid}`);
       flags.members[i].uuid = true;
     }
     if (!(m.perf_tweak >= PERF_MIN && m.perf_tweak <= PERF_MAX)) {
-      messages.push(`${label} #${i + 1}: ${t('validation.perfRange')}`);
+      messages.push(`${label} #${i + 1}: ${t().validation.perfRange}`);
       flags.members[i].perf = true;
     }
   });
@@ -173,7 +173,7 @@ function validateReport(
   };
 
   if (!MATCH_TYPE_RE.test(matchType.trim())) {
-    messages.push(t('validation.matchType'));
+    messages.push(t().validation.matchType);
     report.matchType = true;
   }
 
@@ -184,7 +184,7 @@ function validateReport(
   if (startTrim !== '') {
     startMs = Date.parse(startTrim);
     if (Number.isNaN(startMs)) {
-      messages.push(t('validation.timeFormat'));
+      messages.push(t().validation.timeFormat);
       report.times = true;
       startMs = null;
     }
@@ -192,19 +192,19 @@ function validateReport(
   if (finishTrim !== '') {
     finishMs = Date.parse(finishTrim);
     if (Number.isNaN(finishMs)) {
-      if (!report.times) messages.push(t('validation.timeFormat'));
+      if (!report.times) messages.push(t().validation.timeFormat);
       report.times = true;
       finishMs = null;
     }
   }
   if (startMs !== null && finishMs !== null) {
     if (finishMs <= startMs) {
-      messages.push(t('validation.timeOrder'));
+      messages.push(t().validation.timeOrder);
       report.times = true;
     } else if (durationSeconds > 0) {
       const diffSec = Math.round((finishMs - startMs) / 1000);
       if (Math.abs(diffSec - durationSeconds) > 1) {
-        messages.push(t('validation.durationMismatch'));
+        messages.push(t().validation.durationMismatch);
         report.times = true;
       }
     }
@@ -218,13 +218,13 @@ function validateReport(
     const id = team.team_id.trim();
     if (id === '') return;
     if (seen.has(id)) {
-      messages.push(t('validation.duplicateTeamId'));
+      messages.push(t().validation.duplicateTeamId);
     }
     seen.add(id);
   });
 
   if (loserTeams.length === 0) {
-    messages.push(t('validation.needsLoser'));
+    messages.push(t().validation.needsLoser);
   }
 
   return report;
@@ -370,7 +370,7 @@ export default function MatchReporter() {
       try {
         parsed = JSON.parse(batchText);
       } catch (e) {
-        throw new Error(`${t('reporter.batch.parseFailed')}: ${errMsg(e)}`);
+        throw new Error(`${t().reporter.batchParseFailed}: ${errMsg(e)}`);
       }
       let items: unknown[];
       if (Array.isArray(parsed)) {
@@ -378,10 +378,10 @@ export default function MatchReporter() {
       } else if (parsed && typeof parsed === 'object') {
         items = [parsed];
       } else {
-        throw new Error(t('reporter.batch.badShape'));
+        throw new Error(t().reporter.batchBadShape);
       }
       if (items.length === 0) {
-        throw new Error(t('reporter.batch.empty'));
+        throw new Error(t().reporter.batchEmpty);
       }
 
       setBatchProgress({ done: 0, total: items.length });
@@ -413,12 +413,12 @@ export default function MatchReporter() {
   const opsChip = () => {
     if (!ops) return null;
     if (ops.reporter_configured) {
-      return <Chip size="small" color="success" label={t('ops.reporter')} />;
+      return <Chip size="small" color="success" label={t().ops.reporter} />;
     }
     if (ops.using_fallback) {
-      return <Chip size="small" color="info" label={t('ops.fallback')} />;
+      return <Chip size="small" color="info" label={t().ops.fallback} />;
     }
-    return <Chip size="small" color="error" label={t('ops.none')} />;
+    return <Chip size="small" color="error" label={t().ops.none} />;
   };
 
   const teamEditor = (
@@ -544,7 +544,7 @@ export default function MatchReporter() {
         startIcon={<AddIcon />}
         onClick={() => onChange({ members: [...team.members, newMember()] })}
       >
-        {t('reporter.addMember')}
+        {t().reporter.addMember}
       </Button>
     </Paper>
   );
@@ -552,19 +552,19 @@ export default function MatchReporter() {
   return (
     <Box>
       <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
-        <Typography variant="h4">{t('reporter.title')}</Typography>
+        <Typography variant="h4">{t().reporter.title}</Typography>
         {opsChip()}
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('reporter.intro')}
-        {ops && ops.upstream_url ? ` (${t('ops.upstream')}: ${ops.upstream_url})` : ''}
+        {t().reporter.intro}
+        {ops && ops.upstream_url ? ` (${t().ops.upstream}: ${ops.upstream_url})` : ''}
       </Typography>
 
       {/* single report */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('reporter.single.title')}
+            {t().reporter.singleTitle}
           </Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
             <TextField
@@ -596,38 +596,38 @@ export default function MatchReporter() {
               onChange={(e) => setFinishedAt(e.target.value)}
             />
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel id="reporter-source-label">{t('reporter.sourceLabel')}</InputLabel>
+              <InputLabel id="reporter-source-label">{t().reporter.sourceLabel}</InputLabel>
               <Select
                 labelId="reporter-source-label"
-                label={t('reporter.sourceLabel')}
+                label={t().reporter.sourceLabel}
                 value={source}
                 onChange={(e) => setSource(e.target.value as 'game' | 'virtual')}
               >
-                <MenuItem value="game">{t('reporter.sourceGame')}</MenuItem>
-                <MenuItem value="virtual">{t('reporter.sourceVirtual')}</MenuItem>
+                <MenuItem value="game">{t().reporter.sourceGame}</MenuItem>
+                <MenuItem value="virtual">{t().reporter.sourceVirtual}</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label={t('reporter.matchmakingGroupId')}
+              label={t().reporter.matchmakingGroupId}
               size="small"
               type="number"
               value={matchmakingGroupId}
               onChange={(e) => setMatchmakingGroupId(Number(e.target.value) || 0)}
-              helperText={t('reporter.matchmakingGroupIdNote')}
+              helperText={t().reporter.matchmakingGroupIdNote}
               sx={{ minWidth: 240 }}
             />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-            {t('reporter.sourceNote')}
+            {t().reporter.sourceNote}
           </Typography>
 
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t('reporter.winnerTeam')}
+            {t().reporter.winnerTeam}
           </Typography>
           {teamEditor(winnerTeam, validation.teamFlags[0] ?? { teamId: false, counts: false, members: [] }, updateWinner, false)}
 
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t('reporter.loserTeams')}
+            {t().reporter.loserTeams}
           </Typography>
           {loserTeams.map((team, index) =>
             teamEditor(
@@ -641,7 +641,7 @@ export default function MatchReporter() {
 
           {!valid && (
             <Alert severity="warning" sx={{ mb: 2 }}>
-              <Typography variant="subtitle2">{t('validation.summary')}</Typography>
+              <Typography variant="subtitle2">{t().validation.summary}</Typography>
               <ul style={{ margin: '4px 0 0 0', paddingLeft: 20 }}>
                 {validation.messages.map((m, i) => (
                   <li key={i}>{m}</li>
@@ -652,7 +652,7 @@ export default function MatchReporter() {
 
           <Stack direction="row" spacing={2}>
             <Button startIcon={<AddIcon />} onClick={addLoserTeam} variant="outlined">
-              {t('reporter.addLoserTeam')}
+              {t().reporter.addLoserTeam}
             </Button>
             <Button
               startIcon={<SendIcon />}
@@ -660,7 +660,7 @@ export default function MatchReporter() {
               disabled={submitting || !valid}
               variant="contained"
             >
-              {submitting ? t('reporter.submitting') : t('reporter.submit')}
+              {submitting ? t().reporter.submitting : t().reporter.submit}
             </Button>
           </Stack>
 
@@ -677,12 +677,12 @@ export default function MatchReporter() {
                 sx={{ mb: 1 }}
                 action={
                   <Button color="inherit" size="small" onClick={() => viewMatch(result.id)}>
-                    {t('reporter.view')}
+                    {t().reporter.view}
                   </Button>
                 }
               >
-                {t('reporter.success')} (ID: #{result.id}) — {t('reporter.source')}={result.source}
-                {result.winner_team_id ? `, ${t('reporter.winnerTeamLabel')}=${result.winner_team_id}` : ''}
+                {t().reporter.success} (ID: #{result.id}) — {t().reporter.source}={result.source}
+                {result.winner_team_id ? `, ${t().reporter.winnerTeamLabel}=${result.winner_team_id}` : ''}
               </Alert>
               {result.participants && result.participants.length > 0 ? (
                 <TableContainer component={Paper}>
@@ -690,12 +690,12 @@ export default function MatchReporter() {
                     <TableHead>
                       <TableRow>
                         {[
-                          t('table.uid'),
-                          t('table.team'),
-                          t('table.result'),
-                          t('table.before'),
-                          t('table.delta'),
-                          t('table.after'),
+                          t().table.uid,
+                          t().table.team,
+                          t().table.result,
+                          t().table.before,
+                          t().table.delta,
+                          t().table.after,
                         ].map((h) => (
                           <TableCell key={h}>{h}</TableCell>
                         ))}
@@ -708,7 +708,7 @@ export default function MatchReporter() {
                           <TableCell>{p.team_id}</TableCell>
                           <TableCell>
                             <Chip
-                              label={p.is_winner ? t('result.win') : p.is_draw ? t('result.draw') : t('result.lose')}
+                              label={p.is_winner ? t().result.win : p.is_draw ? t().result.draw : t().result.lose}
                               size="small"
                               color={p.is_winner ? 'success' : p.is_draw ? 'default' : 'error'}
                             />
@@ -726,7 +726,7 @@ export default function MatchReporter() {
                 </TableContainer>
               ) : (
                 <Typography variant="body2" color="text.secondary">
-                  {t('reporter.noParticipants')}
+                  {t().reporter.noParticipants}
                 </Typography>
               )}
             </Box>
@@ -738,16 +738,16 @@ export default function MatchReporter() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
-            {t('reporter.batch.title')}
+            {t().reporter.batchTitle}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('reporter.batch.intro')}
+            {t().reporter.batchIntro}
           </Typography>
           <TextField
             fullWidth
             multiline
             minRows={6}
-            placeholder={t('reporter.batch.placeholder')}
+            placeholder={t().reporter.batchPlaceholder}
             value={batchText}
             onChange={(e) => setBatchText(e.target.value)}
           />
@@ -759,11 +759,11 @@ export default function MatchReporter() {
               disabled={batchRunning || batchText.trim() === ''}
               variant="contained"
             >
-              {batchRunning ? t('reporter.batch.running') : t('reporter.batch.submit')}
+              {batchRunning ? t().reporter.batchRunning : t().reporter.batchSubmit}
             </Button>
             {batchRunning && batchProgress && (
               <Typography variant="body2" color="text.secondary">
-                {t('reporter.batch.reporting')} {batchProgress.done}/{batchProgress.total}…
+                {t().reporter.batchReporting} {batchProgress.done}/{batchProgress.total}…
               </Typography>
             )}
           </Stack>
@@ -776,7 +776,7 @@ export default function MatchReporter() {
 
           {batchDone && (
             <Alert severity={batchFailCount === 0 ? 'success' : 'info'} sx={{ mt: 2 }}>
-              {batchOkCount} {t('reporter.batch.reported')} · {batchFailCount} {t('reporter.batch.failed')}
+              {batchOkCount} {t().reporter.batchReported} · {batchFailCount} {t().reporter.batchFailed}
             </Alert>
           )}
 
@@ -785,7 +785,7 @@ export default function MatchReporter() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    {[t('table.index'), t('table.status'), t('table.matchOrError'), ''].map((h, i) => (
+                    {[t().table.index, t().table.status, t().table.matchOrError, ''].map((h, i) => (
                       <TableCell key={i}>{h}</TableCell>
                     ))}
                   </TableRow>
@@ -796,7 +796,7 @@ export default function MatchReporter() {
                       <TableCell>{r.index}</TableCell>
                       <TableCell>
                         <Chip
-                          label={r.ok ? t('status.success') : t('status.failed')}
+                          label={r.ok ? t().status.success : t().status.failed}
                           size="small"
                           color={r.ok ? 'success' : 'error'}
                         />
@@ -804,7 +804,7 @@ export default function MatchReporter() {
                       <TableCell>{r.ok ? `#${r.matchId}` : r.error}</TableCell>
                       <TableCell align="right">
                         {r.ok && r.matchId !== undefined && (
-                          <Tooltip title={t('reporter.view')}>
+                          <Tooltip title={t().reporter.view}>
                             <IconButton size="small" onClick={() => viewMatch(r.matchId!)}>
                               <VisibilityIcon fontSize="small" />
                             </IconButton>
@@ -825,22 +825,22 @@ export default function MatchReporter() {
         <CardContent>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
             <Typography variant="h6" color="primary" sx={{ flexGrow: 1 }}>
-              {t('reqlog.title')}
+              {t().reqlog.title}
             </Typography>
-            <IconButton size="small" onClick={loadRequestLog} aria-label={t('reqlog.refresh')}>
+            <IconButton size="small" onClick={loadRequestLog} aria-label={t().reqlog.refresh}>
               <RefreshIcon fontSize="small" />
             </IconButton>
           </Stack>
           {requestLog.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
-              {t('reqlog.empty')}
+              {t().reqlog.empty}
             </Typography>
           ) : (
             <TableContainer component={Paper} sx={{ maxHeight: 280 }}>
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
-                    {[t('reqlog.time'), t('reqlog.method'), t('reqlog.path'), t('reqlog.status'), t('reqlog.code')].map(
+                    {[t().reqlog.time, t().reqlog.method, t().reqlog.path, t().reqlog.status, t().reqlog.code].map(
                       (h) => (
                         <TableCell key={h}>{h}</TableCell>
                       ),
@@ -868,7 +868,7 @@ export default function MatchReporter() {
 
       <Divider sx={{ my: 2 }} />
       <Typography variant="caption" color="text.secondary">
-        {t('reporter.eloNote')}
+        {t().reporter.eloNote}
       </Typography>
     </Box>
   );

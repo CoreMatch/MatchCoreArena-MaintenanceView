@@ -27,6 +27,7 @@ import {
   ViewList
 } from '@mui/icons-material';
 
+import { t } from './i18n';
 import Dashboard from './components/Dashboard';
 import RedisBrowser from './components/RedisBrowser';
 import DatabaseManager from './components/DatabaseManager';
@@ -57,16 +58,16 @@ export default function App() {
   const [selectedView, setSelectedView] = useState('dashboard');
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-    { id: 'redis', label: 'Redis Browser', icon: <Storage /> },
-    { id: 'database', label: 'Database', icon: <Dns /> },
-    { id: 'match', label: 'Match Manager', icon: <History /> },
-    { id: 'reporter', label: 'Match Reporter', icon: <BugReport /> },
-    { id: 'browser', label: 'Match Browser', icon: <ViewList /> },
-    { id: 'matchmaking', label: 'Matchmaking', icon: <Groups /> },
-    { id: 'rankings', label: 'Rankings & History', icon: <EmojiEvents /> },
-    { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
-    { id: 'config', label: 'Config Manager', icon: <Settings /> },
+    { id: 'dashboard', label: t().nav.dashboard, icon: <DashboardIcon /> },
+    { id: 'redis', label: t().nav.redis, icon: <Storage /> },
+    { id: 'database', label: t().nav.database, icon: <Dns /> },
+    { id: 'match', label: t().nav.match, icon: <History /> },
+    { id: 'reporter', label: t().nav.reporter, icon: <BugReport /> },
+    { id: 'browser', label: t().nav.browser, icon: <ViewList /> },
+    { id: 'matchmaking', label: t().nav.matchmaking, icon: <Groups /> },
+    { id: 'rankings', label: t().nav.rankings, icon: <EmojiEvents /> },
+    { id: 'rating', label: t().nav.rating, icon: <Calculate /> },
+    { id: 'config', label: t().nav.config, icon: <Settings /> },
   ];
 
   const renderContent = () => {
@@ -101,7 +102,7 @@ export default function App() {
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar>
             <Typography variant="h6" noWrap component="div">
-              MCA Maintenance Panel
+              {t().app.title}
             </Typography>
           </Toolbar>
         </AppBar>

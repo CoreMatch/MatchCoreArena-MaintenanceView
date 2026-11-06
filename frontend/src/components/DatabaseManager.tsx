@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Edit, Save, Cancel } from '@mui/icons-material';
 import { GetUsers, UpdateUserRankScore } from '../../wailsjs/go/main/App';
+import { t } from '../i18n';
 
 export default function DatabaseManager() {
   const [users, setUsers] = useState<any[]>([]);
@@ -45,26 +46,26 @@ export default function DatabaseManager() {
       setEditingId(null);
       fetchUsers();
     } catch (err) {
-      alert('Failed to update: ' + err);
+      alert(`${t().database.failedUpdate}: ${err}`);
     }
   };
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        User Management
+        {t().database.title}
       </Typography>
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>UID</TableCell>
-              <TableCell>Level</TableCell>
-              <TableCell>Exp</TableCell>
-              <TableCell>Rank Score</TableCell>
-              <TableCell>Wins</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t().database.uid}</TableCell>
+              <TableCell>{t().database.level}</TableCell>
+              <TableCell>{t().database.exp}</TableCell>
+              <TableCell>{t().database.rankScore}</TableCell>
+              <TableCell>{t().database.wins}</TableCell>
+              <TableCell align="right">{t().database.actions}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
