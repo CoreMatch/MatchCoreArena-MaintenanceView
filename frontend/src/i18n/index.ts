@@ -34,6 +34,14 @@ const messages = {
     'reporter.submitting': 'Reporting...',
     'reporter.recorded': 'recorded',
     'reporter.source': 'source',
+    'reporter.sourceLabel': 'Source',
+    'reporter.sourceGame': 'game (real match)',
+    'reporter.sourceVirtual': 'virtual (ops-fed test match)',
+    'reporter.sourceNote':
+      'Virtual matches go through the same POST /api/matches endpoint and settlement path as real matches; only the source tag differs.',
+    'reporter.matchmakingGroupId': 'Matchmaking group ID',
+    'reporter.matchmakingGroupIdNote':
+      'Optional. Set to a formed group\u2019s ID (from the Matchmaking page) so same-party members share averaged rating deltas. 0 = no party settlement.',
     'reporter.winnerTeamLabel': 'winner team',
     'reporter.noParticipants': 'The server returned no participant details (check the match detail later for rating changes).',
     'reporter.eloNote':
@@ -112,7 +120,7 @@ const messages = {
     'matchmaking.autoRefresh': 'Auto-refreshing every 5s',
     'matchmaking.party.title': 'Party (optional)',
     'matchmaking.party.note':
-      'Party matchmaking is still being implemented server-side; these fields are reserved and sent as party_members when present.',
+      'Queue as a party: the listed UUIDs are sent as party_members and matched as one unit (never split across teams). To settle with shared rating deltas, report the match with the formed group\u2019s matchmaking_group_id.',
     'matchmaking.party.placeholder': 'Player UUID',
     'matchmaking.party.add': 'Add player UUID',
     'matchmaking.party.size': 'Party size',

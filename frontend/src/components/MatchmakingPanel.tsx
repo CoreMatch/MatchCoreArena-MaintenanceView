@@ -51,7 +51,7 @@ export default function MatchmakingPanel() {
   const [busy, setBusy] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
 
-  // ── party (reserved while server-side party matchmaking lands) ──
+  // ── party (sent as party_members; server matches the roster as one unit) ──
   const [partyInput, setPartyInput] = useState('');
   const [partyInputError, setPartyInputError] = useState(false);
   const [partyMembers, setPartyMembers] = useState<string[]>([]);
@@ -225,7 +225,7 @@ export default function MatchmakingPanel() {
         </CardContent>
       </Card>
 
-      {/* party fields (reserved; server-side party matchmaking in progress) */}
+      {/* party fields: UUID roster sent as party_members to the server */}
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">

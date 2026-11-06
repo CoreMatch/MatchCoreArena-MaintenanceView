@@ -343,6 +343,8 @@ export namespace models {
 	    winner_team: TeamReportInfo;
 	    loser_teams: TeamReportInfo[];
 	    duration_seconds: number;
+	    source: string;
+	    matchmaking_group_id: number;
 	    started_at: string;
 	    finished_at: string;
 	
@@ -356,6 +358,8 @@ export namespace models {
 	        this.winner_team = this.convertValues(source["winner_team"], TeamReportInfo);
 	        this.loser_teams = this.convertValues(source["loser_teams"], TeamReportInfo);
 	        this.duration_seconds = source["duration_seconds"];
+	        this.source = source["source"];
+	        this.matchmaking_group_id = source["matchmaking_group_id"];
 	        this.started_at = source["started_at"];
 	        this.finished_at = source["finished_at"];
 	    }

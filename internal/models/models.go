@@ -118,13 +118,18 @@ type TeamReportInfo struct {
 
 // TeamReportInput POST /api/matches 的上报参数。
 // StartedAt/FinishedAt 为 RFC3339；留空时由代理层补当前时间（服务端要求必填）。
+// Source 取值 game/virtual（留空服务端按 game 处理）；virtual 即运维灌入的假对局，
+// 与真实对局走同一端点、同一结算路径。
+// MatchmakingGroupID 关联匹配成局，用于组队（party）共享结算；0 表示不关联。
 type TeamReportInput struct {
-	MatchType       string           `json:"match_type"`
-	WinnerTeam      TeamReportInfo   `json:"winner_team"`
-	LoserTeams      []TeamReportInfo `json:"loser_teams"`
-	DurationSeconds int              `json:"duration_seconds,omitempty"`
-	StartedAt       string           `json:"started_at,omitempty"`
-	FinishedAt      string           `json:"finished_at,omitempty"`
+	MatchType          string           `json:"match_type"`
+	WinnerTeam         TeamReportInfo   `json:"winner_team"`
+	LoserTeams         []TeamReportInfo `json:"loser_teams"`
+	DurationSeconds    int              `json:"duration_seconds,omitempty"`
+	Source             string           `json:"source,omitempty"`
+	MatchmakingGroupID int64            `json:"matchmaking_group_id,omitempty"`
+	StartedAt          string           `json:"started_at,omitempty"`
+	FinishedAt         string           `json:"finished_at,omitempty"`
 }
 
 // ParticipantDetail 对局参与者明细（含本局评分变动），随对局详情返回。

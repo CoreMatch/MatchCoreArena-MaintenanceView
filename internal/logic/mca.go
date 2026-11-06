@@ -251,9 +251,9 @@ func (s *MaintenanceService) GetMatchByID(ctx context.Context, id int64) (models
 // ─── 匹配（以当前服务令牌对应的身份操作）───
 
 // JoinMatchmaking 加入匹配队列。
-// partyMembers 为组队预留字段（组队匹配服务端实现中）：非空时随请求体以
-// party_members 发送，当前服务端忽略未知字段；字段名待服务端契约确定后
-// 对齐（见 PENDING-DECISIONS）。
+// partyMembers 为组队入队名单（与服务端 party_members 字段同名）：非空时以
+// party_members 随请求体发送，服务端将整队作为一个匹配单元入队，成局后不拆队，
+// 结算时同队成员共享评分变动（需在上报对局时携带 matchmaking_group_id）。
 func (s *MaintenanceService) JoinMatchmaking(ctx context.Context, matchType string, partyMembers []string) (models.QueueEntry, error) {
 	var empty models.QueueEntry
 	if strings.TrimSpace(matchType) == "" {

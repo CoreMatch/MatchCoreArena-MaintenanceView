@@ -7,8 +7,12 @@ import {
   CardContent,
   Chip,
   Divider,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -250,6 +254,12 @@ export default function MatchReporter() {
   const [finishedAt, setFinishedAt] = useState('');
   const [winnerTeam, setWinnerTeam] = useState<TeamForm>(newTeam('A'));
   const [loserTeams, setLoserTeams] = useState<TeamForm[]>([newTeam('B')]);
+  // source: game (real) / virtual (ops-fed test match). Both settle through the
+  // same POST /api/matches path; only the source tag differs.
+  const [source, setSource] = useState<'game' | 'virtual'>('game');
+  // matchmaking_group_id: 0 = no party settlement; set to a formed group's ID
+  // (from the Matchmaking page) to share rating deltas across a party.
+  const [matchmakingGroupId, setMatchmakingGroupId] = useState<number>(0);
 
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<models.Match | null>(null);
@@ -306,6 +316,8 @@ export default function MatchReporter() {
       winner_team: buildTeamPayload(winnerTeam),
       loser_teams: loserTeams.map(buildTeamPayload),
       duration_seconds: durationSeconds,
+      source,
+      matchmaking_group_id: matchmakingGroupId,
       started_at: startedAt.trim() || undefined,
       finished_at: finishedAt.trim() || undefined,
     });
@@ -579,7 +591,31 @@ export default function MatchReporter() {
               value={finishedAt}
               onChange={(e) => setFinishedAt(e.target.value)}
             />
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <InputLabel id="reporter-source-label">{t('reporter.sourceLabel')}</InputLabel>
+              <Select
+                labelId="reporter-source-label"
+                label={t('reporter.sourceLabel')}
+                value={source}
+                onChange={(e) => setSource(e.target.value as 'game' | 'virtual')}
+              >
+                <MenuItem value="game">{t('reporter.sourceGame')}</MenuItem>
+                <MenuItem value="virtual">{t('reporter.sourceVirtual')}</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label={t('reporter.matchmakingGroupId')}
+              size="small"
+              type="number"
+              value={matchmakingGroupId}
+              onChange={(e) => setMatchmakingGroupId(Number(e.target.value) || 0)}
+              helperText={t('reporter.matchmakingGroupIdNote')}
+              sx={{ minWidth: 240 }}
+            />
           </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+            {t('reporter.sourceNote')}
+          </Typography>
 
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             {t('reporter.winnerTeam')}

@@ -25,9 +25,15 @@ already tunnels data operations through the upstream maintenance endpoint
 - Page inventory:
   - Match Reporter — single-match form shaped exactly like the contract's
     `TeamReportInput` (winner team + loser teams, per-member uuid /
-    survival / kills / deaths / perf_tweak), plus a batch box accepting a
-    `TeamReportInput` JSON object or array, submitted sequentially. Empty
-    `started_at`/`finished_at` are filled with the current RFC3339 time
+    survival / kills / deaths / perf_tweak), plus a `source` selector
+    (`game` / `virtual`, default `game`) and an optional
+    `matchmaking_group_id` input. `source=virtual` marks an ops-fed test
+    match that settles through the same `POST /api/matches` path as real
+    games — there is no separate virtual endpoint. `matchmaking_group_id`
+    ties a report to a formed matchmaking group so same-party members share
+    averaged rating deltas; `0` means no party settlement. A batch box
+    accepts a `TeamReportInput` JSON object or array, submitted sequentially.
+    Empty `started_at`/`finished_at` are filled with the current RFC3339 time
     because the endpoint requires both. After a successful report the console
     fetches `GET /api/matches/{id}` to show each participant's rating
     before/delta/after (`after` rendered as `max(0, before+delta)`, the
@@ -44,11 +50,11 @@ already tunnels data operations through the upstream maintenance endpoint
     whichever UID the configured service token resolves to (management token
     → UID -1). This is intentional for engine debugging, not player
     impersonation. The queue status card polls the status endpoint every 5 s
-    and renders a live waiting timer from `enqueued_at`. Party fields
-    (member UUID list) are reserved at the team dimension while server-side
-    party matchmaking lands: non-empty lists are sent as `party_members` in
-    the join body, which the current server ignores (field name pending the
-    server contract; see the workspace PENDING-DECISIONS).
+    and renders a live waiting timer from `enqueued_at`. The party roster
+    (member UUID list) is sent as `party_members` in the join body; the
+    server enqueues the roster as one ephemeral party unit that is never
+    split across teams and settles with shared deltas when the match is
+    reported against the formed group's `matchmaking_group_id`.
   - Rankings & History — read-only. Top-N via `GET /api/rankings/{type}`
     (current season only; no season page). Per-player history has no
     business endpoint for arbitrary players, so it reuses the maintenance SQL
@@ -93,7 +99,8 @@ already tunnels data operations through the upstream maintenance endpoint
 - internal/logic/mca.go::GetPlayerHistory — history through the maintenance SQL tunnel
 - internal/logic/mca.go::recordRequest — request-log ring buffer feed
 - internal/logic/mca.go::GetOpsIdentity — credential state without token material
-- internal/logic/mca.go::party_members — reserved party field in the join body
+- internal/logic/mca.go::JoinMatchmaking — `party_members` roster sent in the join body
+- internal/models/models.go::TeamReportInput — `source` and `matchmaking_group_id` report fields
 - internal/models/models.go::MCAConfig — `mca.reporter_token` config field
 - internal/models/models.go::RequestLogEntry — request-log record shape
 - config.yaml (field: mca) — OPS credential section in the committed config
