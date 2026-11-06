@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Box,
@@ -30,6 +30,7 @@ import {
   GetMatchByGameID,
   GetMatchRejections,
   GetMatchByID,
+  GetMetrics,
 } from '../../wailsjs/go/main/App';
 import { models } from '../../wailsjs/go/models';
 import { t } from '../i18n';
@@ -136,6 +137,11 @@ export default function MatchBrowser() {
   const [rejectionsLoading, setRejectionsLoading] = useState(false);
   const [rejectionsError, setRejectionsError] = useState<string | null>(null);
 
+  // ── server metrics (OPS-only, read-only) ──
+  const [metrics, setMetrics] = useState<models.MetricsSnapshot | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(false);
+  const [metricsError, setMetricsError] = useState<string | null>(null);
+
   const queryPage = async (targetPage: number) => {
     setListLoading(true);
     setListError(null);
@@ -209,7 +215,27 @@ export default function MatchBrowser() {
     }
   };
 
+  const loadMetrics = async () => {
+    setMetricsLoading(true);
+    setMetricsError(null);
+    try {
+      setMetrics(await GetMetrics());
+    } catch (err) {
+      setMetricsError(errMsg(err));
+    } finally {
+      setMetricsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const nextEnabled = rows !== null && rows.length === pageSize;
+  // Stable key order for both maps so the panel does not reshuffle on refresh.
+  const counterKeys = metrics ? Object.keys(metrics.counters || {}).sort() : [];
+  const queueDepthKeys = metrics ? Object.keys(metrics.queue_depth || {}).sort() : [];
 
   return (
     <Box>
@@ -405,7 +431,7 @@ export default function MatchBrowser() {
       </Card>
 
       {/* rejections */}
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
             <Typography variant="h6" color="primary" sx={{ flexGrow: 1 }}>
@@ -457,6 +483,114 @@ export default function MatchBrowser() {
                 </Table>
               </TableContainer>
             ))}
+        </CardContent>
+      </Card>
+
+      {/* server metrics (OPS-only, read-only) */}
+      <Card>
+        <CardContent>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
+            <Typography variant="h6" color="primary" sx={{ flexGrow: 1 }}>
+              {t().metrics.title}
+            </Typography>
+            <Tooltip title={t().metrics.refresh}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={loadMetrics}
+                  disabled={metricsLoading}
+                  aria-label={t().metrics.refresh}
+                >
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t().metrics.intro}
+          </Typography>
+
+          {metricsError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {metricsError}
+            </Alert>
+          )}
+
+          {metricsLoading && !metrics ? (
+            <Typography variant="body2" color="text.secondary">
+              {t().metrics.loading}
+            </Typography>
+          ) : (
+            metrics && (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: 2,
+                  gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    {t().metrics.counters}
+                  </Typography>
+                  {counterKeys.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      {t().metrics.countersEmpty}
+                    </Typography>
+                  ) : (
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{t().metrics.counter}</TableCell>
+                            <TableCell align="right">{t().metrics.value}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {counterKeys.map((key) => (
+                            <TableRow key={key}>
+                              <TableCell sx={{ fontFamily: 'monospace' }}>{key}</TableCell>
+                              <TableCell align="right">{metrics.counters[key]}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    {t().metrics.queueDepth}
+                  </Typography>
+                  {queueDepthKeys.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      {t().metrics.queueDepthEmpty}
+                    </Typography>
+                  ) : (
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{t().metrics.mode}</TableCell>
+                            <TableCell align="right">{t().metrics.depth}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {queueDepthKeys.map((key) => (
+                            <TableRow key={key}>
+                              <TableCell>{key}</TableCell>
+                              <TableCell align="right">{metrics.queue_depth[key]}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </Box>
+              </Box>
+            )
+          )}
         </CardContent>
       </Card>
     </Box>

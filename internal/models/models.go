@@ -203,12 +203,28 @@ type GroupMember struct {
 	RankScore int    `json:"rank_score"`
 }
 
+// JoinTarget 成局下发的游戏服务器地址（服务端配置 matchmaking.join_target
+// 时出现；未配置时服务端省略该字段）。
+type JoinTarget struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
 // FormedGroup 匹配成局记录。
 type FormedGroup struct {
-	GroupID   int64         `json:"group_id"`
-	MatchType string        `json:"match_type"`
-	FormedAt  string        `json:"formed_at"`
-	Members   []GroupMember `json:"members"`
+	GroupID    int64         `json:"group_id"`
+	MatchType  string        `json:"match_type"`
+	FormedAt   string        `json:"formed_at"`
+	Members    []GroupMember `json:"members"`
+	JoinTarget *JoinTarget   `json:"join_target,omitempty"`
+}
+
+// QueueStats 队列规模统计（只读展示用）。旧服务端不返回该字段，
+// 因此使用指针以区分“缺失”与“全零队列”。
+type QueueStats struct {
+	Players            int64 `json:"players"`
+	Parties            int64 `json:"parties"`
+	AverageWaitSeconds int64 `json:"average_wait_seconds"`
 }
 
 // MatchmakingStatus 当前令牌身份在匹配系统中的状态。
@@ -216,6 +232,13 @@ type MatchmakingStatus struct {
 	InQueue      bool          `json:"in_queue"`
 	QueueEntry   *QueueEntry   `json:"queue_entry,omitempty"`
 	RecentGroups []FormedGroup `json:"recent_groups"`
+	QueueStats   *QueueStats   `json:"queue_stats,omitempty"`
+}
+
+// MetricsSnapshot 服务端可观测性快照（GET /api/metrics，仅 OPS 可读）。
+type MetricsSnapshot struct {
+	Counters   map[string]int64 `json:"counters"`
+	QueueDepth map[string]int64 `json:"queue_depth"`
 }
 
 // Ranking 排行榜条目。服务端实际返回 user_uid；user_uuid 为契约旧字段，

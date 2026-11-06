@@ -183,6 +183,11 @@ const en = {
     group: 'group',
     formedAt: 'formed at',
     waiting: 'Waiting',
+    players: 'players',
+    parties: 'parties',
+    avgWait: 'Avg wait',
+    queueStatsUnavailable: 'Queue stats unavailable (older server build)',
+    joinTarget: 'Join target',
     autoRefresh: 'Auto-refreshing every 5s',
     partyTitle: 'Party (optional)',
     partyNote:
@@ -245,6 +250,23 @@ const en = {
     detailTitle: 'Settlement detail',
     detailHint: 'Select a match above (or look one up) to see its settlement.',
     detailMatch: 'Match',
+  },
+
+  // ── Server metrics ──
+  metrics: {
+    title: 'Server Metrics',
+    intro:
+      'OPS-only read-only snapshot (GET /api/metrics): in-process counters and per-mode queue depth.',
+    refresh: 'Refresh metrics',
+    loading: 'Loading...',
+    counters: 'Counters',
+    countersEmpty: 'No counters recorded yet.',
+    queueDepth: 'Queue depth (by mode)',
+    queueDepthEmpty: 'No queued players.',
+    counter: 'Counter',
+    value: 'Value',
+    mode: 'Mode',
+    depth: 'Depth',
   },
 
   // ── Rankings & History ──

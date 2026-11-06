@@ -406,6 +406,40 @@ func (s *MaintenanceService) GetMatchmakingStatus(ctx context.Context) (models.M
 	return status, nil
 }
 
+// ─── 服务端指标（只读，仅 OPS）───
+
+// GetMetrics 获取服务端进程内指标快照（GET /api/metrics，仅 OPS）：
+// 计数器与按模式的队列深度。上游不可达或凭据权限不足时返回翻译后的错误。
+func (s *MaintenanceService) GetMetrics(ctx context.Context) (models.MetricsSnapshot, error) {
+	var empty models.MetricsSnapshot
+	data, err := s.doMCARequest(ctx, http.MethodGet, "/api/metrics", nil, s.serviceToken())
+	if err != nil {
+		// The shared scope-error text is report-oriented; metrics need OPS too.
+		if strings.Contains(err.Error(), "oauth_insufficient_scope") {
+			return empty, fmt.Errorf("Server metrics require an OPS-level token (code oauth_insufficient_scope)")
+		}
+		return empty, err
+	}
+
+	var snapshot models.MetricsSnapshot
+	if string(data) == "null" || len(data) == 0 {
+		return models.MetricsSnapshot{
+			Counters:   map[string]int64{},
+			QueueDepth: map[string]int64{},
+		}, nil
+	}
+	if err := json.Unmarshal(data, &snapshot); err != nil {
+		return empty, fmt.Errorf("failed to parse metrics snapshot: %w", err)
+	}
+	if snapshot.Counters == nil {
+		snapshot.Counters = map[string]int64{}
+	}
+	if snapshot.QueueDepth == nil {
+		snapshot.QueueDepth = map[string]int64{}
+	}
+	return snapshot, nil
+}
+
 // ─── 排行榜与玩家战绩（只读）───
 
 // GetTopRankings 获取指定类型的 Top N 排行榜（当前赛季，赛季页面暂不做）。
