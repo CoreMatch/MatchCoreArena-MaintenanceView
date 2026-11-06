@@ -71,8 +71,18 @@ type ConfigHistoryItem struct {
 type Config struct {
 	UpstreamURL     string         `yaml:"upstream_url" json:"upstream_url"`
 	ManagementToken string         `yaml:"management_token" json:"management_token"`
+	MCA             MCAConfig      `yaml:"mca" json:"mca"`
 	Database        DatabaseConfig `yaml:"database" json:"database"`
 	Redis           RedisConfig    `yaml:"redis" json:"redis"`
+}
+
+// MCAConfig MCA 业务接口的代理凭据配置。
+// 令牌只由本进程持有并用于代理调用，绝不下发到前端。
+type MCAConfig struct {
+	// ReporterToken 对局上报使用的 OPS 级服务令牌（需携带 match:report
+	// scope，或服务端 tokens.yaml 中配置的任意服务令牌）。
+	// 留空时回落到 ManagementToken（maintenance scope 在服务端等价于全权限）。
+	ReporterToken string `yaml:"reporter_token" json:"reporter_token"`
 }
 
 // DatabaseConfig 数据库配置
@@ -85,4 +95,146 @@ type RedisConfig struct {
 	Addr     string `yaml:"addr" json:"addr"`
 	Password string `yaml:"password" json:"password"`
 	DB       int    `yaml:"db" json:"db"`
+}
+
+// ─── MCA 业务接口模型（字段与 HA-Contract matchcorearena-business.yaml 对齐）───
+
+// ParticipantReport 上报时的单个参与者（Minecraft UUID 必填）。
+type ParticipantReport struct {
+	UUID         string  `json:"uuid"`
+	SurvivalTime int     `json:"survival_time,omitempty"`
+	Kills        int     `json:"kills,omitempty"`
+	Deaths       int     `json:"deaths,omitempty"`
+	PerfTweak    float64 `json:"perf_tweak,omitempty"`
+}
+
+// TeamReportInfo 上报中的一支队伍。
+type TeamReportInfo struct {
+	TeamID       string              `json:"team_id"`
+	InitialCount int                 `json:"initial_count,omitempty"`
+	AliveCount   int                 `json:"alive_count,omitempty"`
+	Members      []ParticipantReport `json:"members"`
+}
+
+// TeamReportInput POST /api/matches 的上报参数。
+// StartedAt/FinishedAt 为 RFC3339；留空时由代理层补当前时间（服务端要求必填）。
+type TeamReportInput struct {
+	MatchType       string           `json:"match_type"`
+	WinnerTeam      TeamReportInfo   `json:"winner_team"`
+	LoserTeams      []TeamReportInfo `json:"loser_teams"`
+	DurationSeconds int              `json:"duration_seconds,omitempty"`
+	StartedAt       string           `json:"started_at,omitempty"`
+	FinishedAt      string           `json:"finished_at,omitempty"`
+}
+
+// ParticipantDetail 对局参与者明细（含本局评分变动），随对局详情返回。
+type ParticipantDetail struct {
+	UID             int64  `json:"uid"`
+	TeamID          string `json:"team_id"`
+	IsWinner        bool   `json:"is_winner"`
+	IsDraw          bool   `json:"is_draw"`
+	RankScoreBefore int    `json:"rank_score_before"`
+	RankScoreDelta  int    `json:"rank_score_delta"`
+	SurvivalTime    int    `json:"survival_time"`
+	Kills           int    `json:"kills"`
+	Deaths          int    `json:"deaths"`
+}
+
+// Match 对局记录。时间字段按服务端返回的字符串原样承载。
+type Match struct {
+	ID              int64               `json:"id"`
+	MatchType       string              `json:"match_type"`
+	Source          string              `json:"source"`
+	MapName         string              `json:"map_name"`
+	WinnerTeamID    string              `json:"winner_team_id"`
+	SurvivalRate    float64             `json:"survival_rate"`
+	DurationSeconds int                 `json:"duration_seconds"`
+	StartedAt       string              `json:"started_at"`
+	FinishedAt      string              `json:"finished_at"`
+	CreatedAt       string              `json:"created_at"`
+	Participants    []ParticipantDetail `json:"participants,omitempty"`
+}
+
+// QueueEntry 匹配队列条目。
+type QueueEntry struct {
+	UID        int64  `json:"uid"`
+	MatchType  string `json:"match_type"`
+	RankScore  int    `json:"rank_score"`
+	EnqueuedAt string `json:"enqueued_at"`
+}
+
+// GroupMember 匹配成局成员。
+type GroupMember struct {
+	UID       int64  `json:"uid"`
+	TeamID    string `json:"team_id"`
+	RankScore int    `json:"rank_score"`
+}
+
+// FormedGroup 匹配成局记录。
+type FormedGroup struct {
+	GroupID   int64         `json:"group_id"`
+	MatchType string        `json:"match_type"`
+	FormedAt  string        `json:"formed_at"`
+	Members   []GroupMember `json:"members"`
+}
+
+// MatchmakingStatus 当前令牌身份在匹配系统中的状态。
+type MatchmakingStatus struct {
+	InQueue      bool          `json:"in_queue"`
+	QueueEntry   *QueueEntry   `json:"queue_entry,omitempty"`
+	RecentGroups []FormedGroup `json:"recent_groups"`
+}
+
+// Ranking 排行榜条目。服务端实际返回 user_uid；user_uuid 为契约旧字段，
+// 两者都承载、按非空展示，避免契约漂移导致页面失效。
+type Ranking struct {
+	ID           int64  `json:"id"`
+	UserUID      int64  `json:"user_uid"`
+	UserUUID     string `json:"user_uuid"`
+	RankType     string `json:"rank_type"`
+	Score        int64  `json:"score"`
+	RankPosition int    `json:"rank_position"`
+	Season       int    `json:"season"`
+	UpdatedAt    string `json:"updated_at"`
+}
+
+// PlayerMatchRow 按玩家查询的历史战绩行（经运维 SQL 联表得到）。
+type PlayerMatchRow struct {
+	MatchID         int64  `json:"match_id"`
+	MatchType       string `json:"match_type"`
+	Source          string `json:"source"`
+	MapName         string `json:"map_name"`
+	WinnerTeamID    string `json:"winner_team_id"`
+	DurationSeconds int    `json:"duration_seconds"`
+	StartedAt       string `json:"started_at"`
+	FinishedAt      string `json:"finished_at"`
+	TeamID          string `json:"team_id"`
+	IsWinner        int    `json:"is_winner"`
+	IsDraw          int    `json:"is_draw"`
+	RankScoreBefore int    `json:"rank_score_before"`
+	RankScoreDelta  int    `json:"rank_score_delta"`
+}
+
+// UpstreamStatus GET /api/status 的探测结果。
+type UpstreamStatus struct {
+	Reachable bool   `json:"reachable"`
+	Version   string `json:"version"`
+	Message   string `json:"message"`
+}
+
+// RequestLogEntry 代理层请求日志的一条记录（供 debug 台 Request log 展示）。
+type RequestLogEntry struct {
+	Time   string `json:"time"`           // 本地时间 15:04:05
+	Method string `json:"method"`         // HTTP 方法
+	Path   string `json:"path"`           // 上游路径（不含域名）
+	Status int    `json:"status"`         // HTTP 状态码；0 表示连接失败
+	Code   string `json:"code,omitempty"` // 上游类型化错误码（可为空）
+	OK     bool   `json:"ok"`             // 2xx 记为 true
+}
+
+// OpsIdentity OPS 凭据状态（不含任何令牌明文，仅供界面指示）。
+type OpsIdentity struct {
+	ReporterConfigured bool   `json:"reporter_configured"` // mca.reporter_token 已配置
+	UsingFallback      bool   `json:"using_fallback"`      // 实际回落到 management_token
+	UpstreamURL        string `json:"upstream_url"`        // 当前上游地址
 }

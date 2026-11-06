@@ -20,7 +20,10 @@ import {
   Dns, 
   Calculate,
   History,
-  Settings
+  Settings,
+  BugReport,
+  Groups,
+  EmojiEvents
 } from '@mui/icons-material';
 
 import Dashboard from './components/Dashboard';
@@ -29,6 +32,9 @@ import DatabaseManager from './components/DatabaseManager';
 import RatingSimulator from './components/RatingSimulator';
 import MatchManager from './components/MatchManager';
 import ConfigManager from './components/ConfigManager';
+import MatchReporter from './components/MatchReporter';
+import MatchmakingPanel from './components/MatchmakingPanel';
+import RankingsView from './components/RankingsView';
 
 const drawerWidth = 240;
 
@@ -53,6 +59,9 @@ export default function App() {
     { id: 'redis', label: 'Redis Browser', icon: <Storage /> },
     { id: 'database', label: 'Database', icon: <Dns /> },
     { id: 'match', label: 'Match Manager', icon: <History /> },
+    { id: 'reporter', label: 'Match Reporter', icon: <BugReport /> },
+    { id: 'matchmaking', label: 'Matchmaking', icon: <Groups /> },
+    { id: 'rankings', label: 'Rankings & History', icon: <EmojiEvents /> },
     { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
     { id: 'config', label: 'Config Manager', icon: <Settings /> },
   ];
@@ -65,6 +74,12 @@ export default function App() {
         return <DatabaseManager />;
       case 'match':
         return <MatchManager />;
+      case 'reporter':
+        return <MatchReporter />;
+      case 'matchmaking':
+        return <MatchmakingPanel />;
+      case 'rankings':
+        return <RankingsView />;
       case 'rating':
         return <RatingSimulator />;
       case 'config':

@@ -14,16 +14,56 @@ export function GetConfigHistory() {
   return window['go']['main']['App']['GetConfigHistory']();
 }
 
+export function GetMatchByID(arg1) {
+  return window['go']['main']['App']['GetMatchByID'](arg1);
+}
+
+export function GetMatchmakingStatus() {
+  return window['go']['main']['App']['GetMatchmakingStatus']();
+}
+
+export function GetOpsIdentity() {
+  return window['go']['main']['App']['GetOpsIdentity']();
+}
+
+export function GetPlayerHistory(arg1, arg2) {
+  return window['go']['main']['App']['GetPlayerHistory'](arg1, arg2);
+}
+
 export function GetRedisKeys(arg1) {
   return window['go']['main']['App']['GetRedisKeys'](arg1);
+}
+
+export function GetRequestLog() {
+  return window['go']['main']['App']['GetRequestLog']();
 }
 
 export function GetSystemStats() {
   return window['go']['main']['App']['GetSystemStats']();
 }
 
+export function GetTopRankings(arg1, arg2) {
+  return window['go']['main']['App']['GetTopRankings'](arg1, arg2);
+}
+
+export function GetUpstreamStatus() {
+  return window['go']['main']['App']['GetUpstreamStatus']();
+}
+
 export function GetUsers() {
   return window['go']['main']['App']['GetUsers']();
+}
+
+export function JoinMatchmaking(arg1, arg2) {
+  return window['go']['main']['App']['JoinMatchmaking'](arg1, arg2);
+}
+
+export function LeaveMatchmaking() {
+  return window['go']['main']['App']['LeaveMatchmaking']();
+}
+
+export function ReportMatch(arg1) {
+  return window['go']['main']['App']['ReportMatch'](arg1);
 }
 
 export function RestoreConfig(arg1) {

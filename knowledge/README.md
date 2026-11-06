@@ -19,6 +19,7 @@ conflicts with HA-Contract, fix the entry, not the contract.
 | [0005](0005-yaml-config-with-ui-edit-backup-history-and-restore.md) | YAML Config Managed In-App with Timestamped Backups, History Listing, and Restore | Accepted | config.yaml is editable from the Config Manager; every save writes a timestamped backup into config_history/, and any backup can be restored from the UI. |
 | [0006](0006-wails-go-react-mui-stack-and-repository-layout.md) | Wails v2 + Go Backend with React 19/MUI Frontend; HA-Contract Vendored as a Local Symlink | Accepted | A Wails v2 desktop app (Go 1.25, React 19, MUI 9, Vite 7) with an app.go → internal/{config,logic,models} layout; HA-Contract is a committed symlink to an absolute local path. |
 | [0007](0007-cleanup-pass-checklist.md) | Manual Upload Schema Alignment and Pending Design Decisions | Accepted | The manual match-upload INSERT follows the MatchCoreArena-Server baseline schema, with rationale; design-level issues are listed as pending author decisions. |
+| [0008](0008-match-operations-debug-console-proxies-mca-business-api.md) | Match Operations Debug Console Proxies the MCA Business API with Backend-Held Tokens | Accepted | Match Reporter/Matchmaking/Rankings pages proxy the live business API (single match entry point `POST /api/matches`, no virtual-match concept) with backend-held OPS tokens; typed error envelopes are translated into readable English messages, and UI copy is centralized in `frontend/src/i18n/`. |
 
 ## Maintenance
 

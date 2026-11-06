@@ -8,11 +8,31 @@ export function GetConfig():Promise<models.Config>;
 
 export function GetConfigHistory():Promise<Array<models.ConfigHistoryItem>>;
 
+export function GetMatchByID(arg1:number):Promise<models.Match>;
+
+export function GetMatchmakingStatus():Promise<models.MatchmakingStatus>;
+
+export function GetOpsIdentity():Promise<models.OpsIdentity>;
+
+export function GetPlayerHistory(arg1:number,arg2:number):Promise<Array<models.PlayerMatchRow>>;
+
 export function GetRedisKeys(arg1:string):Promise<Array<models.RedisKey>>;
+
+export function GetRequestLog():Promise<Array<models.RequestLogEntry>>;
 
 export function GetSystemStats():Promise<models.SystemStats>;
 
+export function GetTopRankings(arg1:string,arg2:number):Promise<Array<models.Ranking>>;
+
+export function GetUpstreamStatus():Promise<models.UpstreamStatus>;
+
 export function GetUsers():Promise<Array<models.User>>;
+
+export function JoinMatchmaking(arg1:string,arg2:Array<string>):Promise<models.QueueEntry>;
+
+export function LeaveMatchmaking():Promise<void>;
+
+export function ReportMatch(arg1:models.TeamReportInput):Promise<models.Match>;
 
 export function RestoreConfig(arg1:string):Promise<void>;
 

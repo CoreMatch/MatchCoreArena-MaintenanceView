@@ -21,11 +21,13 @@ import {
 } from '@mui/material';
 import { Restore, Save } from '@mui/icons-material';
 import { GetConfig, SaveConfig, GetConfigHistory, RestoreConfig } from '../../wailsjs/go/main/App';
+import { t } from '../i18n';
 
 export default function ConfigManager() {
   const [config, setConfig] = useState<any>({
     upstream_url: '',
     management_token: '',
+    mca: { reporter_token: '' },
     database: { dsn: '' },
     redis: { addr: '', password: '', db: 0 }
   });
@@ -44,6 +46,9 @@ export default function ConfigManager() {
   const loadData = async () => {
     try {
       const cfg = await GetConfig();
+      if (cfg && !cfg.mca) {
+        cfg.mca = { reporter_token: '' };
+      }
       setConfig(cfg);
       const hist = await GetConfigHistory();
       setHistory(hist);
@@ -130,6 +135,18 @@ export default function ConfigManager() {
                       type="password"
                       value={config.management_token}
                       onChange={(e) => handleChange('management_token', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <Divider sx={{ my: 1 }}>{t('config.mcaSection')}</Divider>
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth
+                      label={t('config.reporterToken')}
+                      type="password"
+                      value={config.mca?.reporter_token ?? ''}
+                      onChange={(e) => handleChange('mca.reporter_token', e.target.value)}
                     />
                   </Grid>
                   <Grid size={{ xs: 12 }}>

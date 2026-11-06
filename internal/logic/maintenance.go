@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"MCA-Maintenance/internal/models"
@@ -26,7 +27,15 @@ type MaintenanceService struct {
 	db         *sql.DB
 	rdb        *redis.Client
 	httpClient *http.Client
+
+	// reqMu/reqLog 代理层请求日志（环形缓冲，最近 requestLogCap 条，
+	// 供 debug 台的 Request log 区展示）。
+	reqMu  sync.Mutex
+	reqLog []models.RequestLogEntry
 }
+
+// requestLogCap 请求日志保留的最大条数。
+const requestLogCap = 50
 
 func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
 	// 暂时不直接使用数据库和 Redis，但保留初始化逻辑以防后续需要
@@ -77,19 +86,23 @@ func (s *MaintenanceService) doRequest(ctx context.Context, method, path string,
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
+		s.recordRequest(method, path, 0, "", false)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
+		s.recordRequest(method, path, resp.StatusCode, "", false)
 		return nil, err
 	}
 
 	if resp.StatusCode >= 400 {
+		s.recordRequest(method, path, resp.StatusCode, parseMCAErrorCode(respBody), false)
 		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(respBody))
 	}
 
+	s.recordRequest(method, path, resp.StatusCode, "", true)
 	return respBody, nil
 }
 

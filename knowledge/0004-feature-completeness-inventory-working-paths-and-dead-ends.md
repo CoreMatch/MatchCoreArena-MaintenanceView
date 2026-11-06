@@ -19,9 +19,17 @@ Working paths:
 - Database / User Management — lists the first 100 non-deleted users and can
   overwrite a user's `rank_score` (both via maintenance SQL; the users-table
   columns referenced match the server baseline schema).
+- Match Reporter — developer debug console over the business API: single and
+  batch match feed through `POST /api/matches`, settlement display with
+  rating before/delta/after, all proxied with backend-held tokens
+  (entry 0008).
+- Matchmaking — join/leave/status against the live matchmaking endpoints as
+  the service-token identity (entry 0008).
+- Rankings & History — read-only Top-N rankings and per-player history
+  (history via maintenance SQL; entry 0008).
 - Rating Simulator — fully local computation, always available (entry 0003).
 - Config Manager — edit/save/backup/history/restore of `config.yaml`
-  (entry 0005).
+  (entry 0005), including the `mca.reporter_token` field.
 
 Dead or broken paths:
 

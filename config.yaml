@@ -2,6 +2,14 @@
 upstream_url: "https://arena.mcnb.dev/"
 management_token: "your-management-token-here"
 
+mca:
+  # OPS-grade service token used by the business-API proxy (match reporting
+  # etc.); it must carry the match:report scope (see server tokens.yaml).
+  # Empty = fall back to management_token above (maintenance scope implies
+  # all scopes server-side). The token is held by this process only; the
+  # frontend never sees it.
+  reporter_token: ""
+
 database:
   dsn: "root:@tcp(127.0.0.1:3306)/matchcorearena?parseTime=true"
 

@@ -20,16 +20,20 @@ The tool is an operator-only console, and its identity model reflects that:
   hosted web service; Go methods are bound directly to the embedded React
   frontend.
 - There is no login screen and no per-operator identity. The tool holds a
-  single static `management_token` in `config.yaml` and sends it as
-  `Authorization: Bearer <token>` on every upstream request.
+  static `management_token` in `config.yaml` and sends it as
+  `Authorization: Bearer <token>` on every upstream request. An optional
+  `mca.reporter_token` (entry 0008) may override it for business-API calls;
+  it defaults to empty, falling back to the management token.
 - On the server side this token is a super-credential: verification
   short-circuits to UID -1 with scopes `["maintenance"]`, and the `maintenance`
-  scope implies every other scope. The only upstream endpoint the tool uses
-  today, `POST /api/maintenance/sql`, requires exactly that scope.
+  scope implies every other scope. The upstream endpoints the tool uses are
+  `POST /api/maintenance/sql` plus the business endpoints proxied by the
+  match-operations pages (entry 0008).
 - The feature surface is administrative only: Dashboard (system stats),
   Database (user list + rank-score edits), Match Manager (manual result
-  upload), Rating Simulator, and Config Manager. No player-facing feature
-  (friends, teams, leaderboard browsing for players) exists.
+  upload), Match Reporter / Matchmaking / Rankings & History (developer
+  debug console over the business API, entry 0008), Rating Simulator, and
+  Config Manager. No player-facing feature (friends, teams) exists.
 
 ## Consequences
 - Operators can run the console from any machine that can reach the upstream
