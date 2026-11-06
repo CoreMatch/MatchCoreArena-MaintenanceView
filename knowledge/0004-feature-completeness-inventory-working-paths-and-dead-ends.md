@@ -13,9 +13,10 @@ Record the completeness state as implemented:
 
 Working paths:
 
-- Dashboard — shows the configured upstream URL and real counts for Total
-  Users and Active Matches via maintenance SQL (but see below for Active
-  Matches).
+- Dashboard — shows the configured upstream URL, Total Users from
+  maintenance SQL, and In Queue / Matches Reported from the OPS metrics proxy
+  (`GET /api/metrics`, entry 0009). When metrics are unavailable the affected
+  cards show "—" instead of a fabricated 0.
 - Database / User Management — lists the first 100 non-deleted users and can
   overwrite a user's `rank_score` (both via maintenance SQL; the users-table
   columns referenced match the server baseline schema).
@@ -35,11 +36,6 @@ Dead or broken paths:
 
 - Redis Browser — the UI is intact (search, view, delete), but the backend
   returns "direct redis access is disabled" unconditionally.
-- Dashboard "Redis Keys" stat — never populated by any code path; always 0.
-- Dashboard "Active Matches" stat — computed as
-  `SELECT COUNT(*) FROM matches WHERE finished_at IS NULL`, but the server
-  baseline declares `finished_at TIMESTAMP NOT NULL`, so the count is
-  structurally always 0.
 - Match Manager upload — the user-update statement and the follow-up
   `INSERT INTO matches` both execute against the MatchCoreArena-Server
   baseline schema; entry 0007 records the INSERT's column choices and their
@@ -50,8 +46,10 @@ Dead or broken paths:
   search.
 
 ## Consequences
-- Operators must know the Redis page and two of the three dashboard stats are
-  decorative; the reliable numbers are Total Users and the user table itself.
+- Operators must know the Redis page is decorative; the reliable numbers are
+  Total Users, the user table itself, and the metrics-backed dashboard cards
+  (In Queue / Matches Reported), which degrade to "—" when metrics fail rather
+  than claiming zero.
 - Manual match-result upload executes against the real schema (entry 0007);
   manual score correction through User Management remains the simpler
   fallback for fixing ratings.
@@ -60,17 +58,20 @@ Dead or broken paths:
     the dead surfaces as disabled.
   - This repo contains no tests at all (no `*_test.go`, no frontend tests),
     so schema drift is caught only at runtime.
-  - The always-zero dashboard stats are silent failures: the UI shows numbers
-    that no code path can ever make non-zero.
+  - Dashboard metric cards depend on a reachable upstream and an OPS-level
+    token; without them the operator sees "—" plus a one-line hint, not data.
 
 ## Evidence
 - internal/logic/maintenance.go::GetRedisKeys — Redis methods hard-disabled
 - internal/logic/maintenance.go::GetUsers — GetUsers with hard-coded LIMIT 100
-- internal/logic/maintenance.go::GetSystemStats, internal/logic/maintenance.go::finished_at — stats queries; Redis-keys comment and active-matches query inside GetSystemStats
+- internal/logic/maintenance.go::GetSystemStats — Total Users count via maintenance SQL (Active Matches / Redis Keys are no longer surfaced)
+- internal/logic/mca.go::GetMetrics — OPS metrics proxy (`GET /api/metrics`) returning `MetricsSnapshot{counters, queue_depth}`
+- app.go::GetMetrics — Wails binding for the metrics snapshot
+- frontend/src/components/Dashboard.tsx::GetMetrics — In Queue = sum of `queue_depth`, Matches Reported = `counters["matches_reported_total"]`, "—" when unavailable
+- frontend/src/i18n/index.ts::dashboard.metricsUnavailable — hint shown when metrics cannot be loaded
 - internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult aligned with the baseline matches schema (entry 0007)
 - internal/models/models.go::MatchResult — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
 - frontend/src/components/RedisBrowser.tsx::GetRedisKeys — UI still calls the disabled backend
-- frontend/src/components/Dashboard.tsx::redis_keys — three stat cards including always-zero Redis Keys
 - frontend/src/components/MatchManager.tsx::match_id — form fields and submit path
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)

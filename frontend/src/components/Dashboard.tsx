@@ -1,26 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Link } from '@mui/material';
-import { Storage, People, SportsEsports, Language } from '@mui/icons-material';
-import { GetConfig, GetSystemStats } from '../../wailsjs/go/main/App';
+import { Assessment, Groups, Language, People } from '@mui/icons-material';
+import { GetConfig, GetMetrics, GetSystemStats } from '../../wailsjs/go/main/App';
+import { models } from '../../wailsjs/go/models';
 import { t } from '../i18n';
 
+// Placeholder for data we do not actually have: never render a fabricated 0.
+const UNKNOWN = '\u2014';
+
 export default function Dashboard() {
-  const [config, setConfig] = useState<any>(null);
-  const [stats, setStats] = useState<any>({
-    total_users: 0,
-    active_matches: 0,
-    redis_keys: 0
-  });
+  const [config, setConfig] = useState<models.Config | null>(null);
+  const [stats, setStats] = useState<models.SystemStats | null>(null);
+  const [metrics, setMetrics] = useState<models.MetricsSnapshot | null>(null);
+  const [metricsError, setMetricsError] = useState(false);
 
   useEffect(() => {
     GetConfig().then(setConfig);
     GetSystemStats().then(setStats).catch(console.error);
+    GetMetrics()
+      .then(setMetrics)
+      .catch((err) => {
+        console.error(err);
+        setMetricsError(true);
+      });
   }, []);
 
+  const inQueue =
+    metrics === null
+      ? null
+      : Object.values(metrics.queue_depth || {}).reduce((sum, depth) => sum + depth, 0);
+
+  const matchesReported =
+    metrics === null ? null : (metrics.counters?.['matches_reported_total'] ?? 0);
+
   const statCards = [
-    { title: t().dashboard.totalUsers, value: stats.total_users.toLocaleString(), icon: <People color="primary" /> },
-    { title: t().dashboard.activeMatches, value: stats.active_matches.toLocaleString(), icon: <SportsEsports color="primary" /> },
-    { title: t().dashboard.redisKeys, value: stats.redis_keys.toLocaleString(), icon: <Storage color="primary" /> },
+    {
+      title: t().dashboard.totalUsers,
+      value: stats === null ? UNKNOWN : stats.total_users.toLocaleString(),
+      icon: <People color="primary" />,
+    },
+    {
+      title: t().dashboard.inQueue,
+      value: inQueue === null ? UNKNOWN : inQueue.toLocaleString(),
+      icon: <Groups color="primary" />,
+    },
+    {
+      title: t().dashboard.matchesReported,
+      value: matchesReported === null ? UNKNOWN : matchesReported.toLocaleString(),
+      icon: <Assessment color="primary" />,
+    },
   ];
 
   return (
@@ -28,7 +56,7 @@ export default function Dashboard() {
       <Typography variant="h4" gutterBottom>
         {t().dashboard.title}
       </Typography>
-      
+
       <Grid container spacing={3} component="div">
         {/* Config Info */}
         <Grid size={{ xs: 12 }} component="div">
@@ -66,6 +94,14 @@ export default function Dashboard() {
             </Card>
           </Grid>
         ))}
+
+        {metricsError && (
+          <Grid size={{ xs: 12 }} component="div">
+            <Typography variant="body2" color="textSecondary">
+              {t().dashboard.metricsUnavailable}
+            </Typography>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );
