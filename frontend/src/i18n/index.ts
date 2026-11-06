@@ -32,8 +32,10 @@ const en = {
   dashboard: {
     title: 'System Overview',
     totalUsers: 'Total Users',
-    activeMatches: 'Active Matches',
-    redisKeys: 'Redis Keys',
+    inQueue: 'In Queue',
+    matchesReported: 'Matches Reported',
+    metricsUnavailable:
+      'Live metrics are unavailable (OPS token not configured or the upstream is unreachable); queue and match counters are shown as unknown.',
     upstreamServer: 'Upstream Server',
     loading: 'Loading...',
   },
