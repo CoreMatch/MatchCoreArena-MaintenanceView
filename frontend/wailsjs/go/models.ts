@@ -500,11 +500,26 @@ export namespace models {
 	        this.rank_score = source["rank_score"];
 	    }
 	}
+	export class JoinTarget {
+	    host: string;
+	    port: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new JoinTarget(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.host = source["host"];
+	        this.port = source["port"];
+	    }
+	}
 	export class FormedGroup {
 	    group_id: number;
 	    match_type: string;
 	    formed_at: string;
 	    members: GroupMember[];
+	    join_target?: JoinTarget;
 	
 	    static createFrom(source: any = {}) {
 	        return new FormedGroup(source);
@@ -516,6 +531,7 @@ export namespace models {
 	        this.match_type = source["match_type"];
 	        this.formed_at = source["formed_at"];
 	        this.members = this.convertValues(source["members"], GroupMember);
+	        this.join_target = this.convertValues(source["join_target"], JoinTarget);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -536,10 +552,27 @@ export namespace models {
 		    return a;
 		}
 	}
+	export class QueueStats {
+	    players: number;
+	    parties: number;
+	    average_wait_seconds: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new QueueStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.players = source["players"];
+	        this.parties = source["parties"];
+	        this.average_wait_seconds = source["average_wait_seconds"];
+	    }
+	}
 	export class MatchmakingStatus {
 	    in_queue: boolean;
 	    queue_entry: QueueEntry;
 	    recent_groups: FormedGroup[];
+	    queue_stats?: QueueStats;
 	
 	    static createFrom(source: any = {}) {
 	        return new MatchmakingStatus(source);
@@ -550,6 +583,7 @@ export namespace models {
 	        this.in_queue = source["in_queue"];
 	        this.queue_entry = this.convertValues(source["queue_entry"], QueueEntry);
 	        this.recent_groups = this.convertValues(source["recent_groups"], FormedGroup);
+	        this.queue_stats = this.convertValues(source["queue_stats"], QueueStats);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -646,6 +680,20 @@ export namespace models {
 	        this.reachable = source["reachable"];
 	        this.version = source["version"];
 	        this.message = source["message"];
+	    }
+	}
+	export class MetricsSnapshot {
+	    counters: Record<string, number>;
+	    queue_depth: Record<string, number>;
+	
+	    static createFrom(source: any = {}) {
+	        return new MetricsSnapshot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.counters = source["counters"];
+	        this.queue_depth = source["queue_depth"];
 	    }
 	}
 	export class RequestLogEntry {

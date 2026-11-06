@@ -30,6 +30,10 @@ export function GetMatchmakingStatus() {
   return window['go']['main']['App']['GetMatchmakingStatus']();
 }
 
+export function GetMetrics() {
+  return window['go']['main']['App']['GetMetrics']();
+}
+
 export function GetOpsIdentity() {
   return window['go']['main']['App']['GetOpsIdentity']();
 }

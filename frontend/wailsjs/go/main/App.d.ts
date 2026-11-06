@@ -16,6 +16,8 @@ export function GetMatchRejections():Promise<Array<models.RejectionRecord>>;
 
 export function GetMatchmakingStatus():Promise<models.MatchmakingStatus>;
 
+export function GetMetrics():Promise<models.MetricsSnapshot>;
+
 export function GetOpsIdentity():Promise<models.OpsIdentity>;
 
 export function GetPlayerHistory(arg1:number,arg2:number):Promise<Array<models.PlayerMatchRow>>;

@@ -54,7 +54,12 @@ already tunnels data operations through the upstream maintenance endpoint
     (member UUID list) is sent as `party_members` in the join body; the
     server enqueues the roster as one ephemeral party unit that is never
     split across teams and settles with shared deltas when the match is
-    reported against the formed group's `matchmaking_group_id`.
+    reported against the formed group's `matchmaking_group_id`. The card also
+    renders the server-provided read-only `queue_stats` (`N players · M
+    parties · Avg wait ~m:ss`) and falls back to an "older server build"
+    note when the field is absent. Each formed group shows its optional
+    `join_target` as `host:port`, or an em dash when the server omits it
+    (unconfigured game-server address).
   - Match Browser — OPS-only read-only queries added with contract v1.5.0:
     the global match list (`GET /api/matches`) with pagination and filters
     (source, map_name, exact game_id, participant uid, finished_at range),
@@ -64,7 +69,10 @@ already tunnels data operations through the upstream maintenance endpoint
     miss); and the rejection ring (`GET /api/matches/rejections`) showing
     time, code (`mca_report_inconsistent` / `mca_game_id_conflict`), game_id
     and redacted reason — the UI states plainly that this ring lives in the
-    server process (last 200 entries, cleared on restart).
+    server process (last 200 entries, cleared on restart). A compact read-only
+    "Server Metrics" card proxies `GET /api/metrics` (OPS-only): counters in
+    stable key order and queue depth by mode. Upstream outages and insufficient
+    scopes surface readable English errors; no token material is shown.
   - Rankings & History — read-only. Top-N via `GET /api/rankings/{type}`
     (current season only; no season page). Per-player history has no
     business endpoint for arbitrary players, so it reuses the maintenance SQL
@@ -113,6 +121,10 @@ already tunnels data operations through the upstream maintenance endpoint
 - internal/logic/mca.go::ListMatches — OPS global match list proxy with filters
 - internal/logic/mca.go::GetMatchByGameID — idempotency-key lookup proxy
 - internal/logic/mca.go::GetMatchRejections — rejection-ring snapshot proxy
+- internal/logic/mca.go::GetMetrics — OPS metrics snapshot proxy (counters + queue depth)
+- internal/models/models.go::QueueStats — `queue_stats` shape from `GET /api/matchmaking/status`
+- internal/models/models.go::JoinTarget — optional `join_target` on formed groups
+- internal/models/models.go::MetricsSnapshot — `{counters, queue_depth}` response shape
 - internal/models/models.go::TeamReportInput — `source` and `matchmaking_group_id` report fields
 - internal/models/models.go::MCAConfig — `mca.reporter_token` config field
 - internal/models/models.go::RequestLogEntry — request-log record shape
@@ -121,8 +133,13 @@ already tunnels data operations through the upstream maintenance endpoint
 - frontend/src/components/MatchReporter.tsx::validateReport — field-level validation blocking submission
 - frontend/src/components/MatchReporter.tsx::submitBatch — batch feed with progress, summary, and per-item View
 - frontend/src/components/MatchmakingPanel.tsx::waitingFor — polled queue status card with live waiting timer
+- frontend/src/components/MatchmakingPanel.tsx::joinTargetText — `join_target` rendering with em-dash fallback
 - frontend/src/components/MatchBrowser.tsx::SettlementTable — OPS query page reusing the settlement detail shape
+- frontend/src/components/MatchBrowser.tsx::loadMetrics — read-only Server Metrics card with stable key order
 - frontend/src/components/RankingsView.tsx::loadRankings — read-only rankings and history
 - frontend/src/i18n/index.ts::validation.matchType — English-first centralized copy dictionary
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/match.go::Report — `match:report` scope gate on the endpoint
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/api/middleware/auth.go::HasScope — maintenance scope implies match:report
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/matchmaking.go::QueueStats — server-side queue stats shape
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/matchmaking.go::JoinTarget — server-side join target shape
+- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/metrics.go::Metrics — OPS-only metrics endpoint

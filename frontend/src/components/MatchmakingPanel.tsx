@@ -37,10 +37,22 @@ function errMsg(err: unknown): string {
 function waitingFor(enqueuedAt: string, nowMs: number): string {
   const start = Date.parse(enqueuedAt);
   if (Number.isNaN(start)) return '';
-  const sec = Math.max(0, Math.floor((nowMs - start) / 1000));
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
+  return formatSeconds(Math.floor((nowMs - start) / 1000));
+}
+
+// "m:ss" for a duration in seconds (used by the queue stats average wait).
+function formatSeconds(sec: number): string {
+  const total = Math.max(0, Math.floor(sec));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// join_target is omitted by servers without a configured game-server address;
+// render an em dash rather than an empty cell.
+function joinTargetText(target?: models.JoinTarget): string {
+  if (!target || !target.host) return '—';
+  return `${target.host}:${target.port}`;
 }
 
 export default function MatchmakingPanel() {
@@ -197,6 +209,12 @@ export default function MatchmakingPanel() {
                 </Typography>
               </Stack>
 
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                {status.queue_stats
+                  ? `${status.queue_stats.players} ${t().matchmaking.players} · ${status.queue_stats.parties} ${t().matchmaking.parties} · ${t().matchmaking.avgWait} ~${formatSeconds(status.queue_stats.average_wait_seconds)}`
+                  : t().matchmaking.queueStatsUnavailable}
+              </Typography>
+
               <Divider sx={{ my: 1 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 {t().matchmaking.recentGroups}
@@ -210,7 +228,7 @@ export default function MatchmakingPanel() {
                   <Paper key={g.group_id} variant="outlined" sx={{ p: 1.5, mb: 1 }}>
                     <Typography variant="body2">
                       {t().matchmaking.group} #{g.group_id} · {g.match_type} · {t().matchmaking.formedAt}{' '}
-                      {g.formed_at}
+                      {g.formed_at} · {t().matchmaking.joinTarget} {joinTargetText(g.join_target)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {(g.members || [])

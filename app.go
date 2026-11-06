@@ -164,6 +164,14 @@ func (a *App) GetMatchmakingStatus() (models.MatchmakingStatus, error) {
 	return a.svc.GetMatchmakingStatus(a.ctx)
 }
 
+// GetMetrics 获取服务端指标快照（仅 OPS：计数器 + 按模式队列深度）
+func (a *App) GetMetrics() (models.MetricsSnapshot, error) {
+	if a.svc == nil {
+		return models.MetricsSnapshot{}, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetMetrics(a.ctx)
+}
+
 // GetTopRankings 获取指定类型的 Top N 排行榜（只读）
 func (a *App) GetTopRankings(rankType string, limit int) ([]models.Ranking, error) {
 	if a.svc == nil {
