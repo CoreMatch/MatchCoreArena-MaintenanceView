@@ -10,6 +10,10 @@ export function GetConfigHistory():Promise<Array<models.ConfigHistoryItem>>;
 
 export function GetMatchByID(arg1:number):Promise<models.Match>;
 
+export function GetMatchByGameID(arg1:string):Promise<models.Match>;
+
+export function GetMatchRejections():Promise<Array<models.RejectionRecord>>;
+
 export function GetMatchmakingStatus():Promise<models.MatchmakingStatus>;
 
 export function GetOpsIdentity():Promise<models.OpsIdentity>;
@@ -31,6 +35,8 @@ export function GetUsers():Promise<Array<models.User>>;
 export function JoinMatchmaking(arg1:string,arg2:Array<string>):Promise<models.QueueEntry>;
 
 export function LeaveMatchmaking():Promise<void>;
+
+export function ListMatches(arg1:models.MatchListQuery):Promise<Array<models.Match>>;
 
 export function ReportMatch(arg1:models.TeamReportInput):Promise<models.Match>;
 

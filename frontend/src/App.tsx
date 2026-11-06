@@ -23,7 +23,8 @@ import {
   Settings,
   BugReport,
   Groups,
-  EmojiEvents
+  EmojiEvents,
+  ViewList
 } from '@mui/icons-material';
 
 import Dashboard from './components/Dashboard';
@@ -33,6 +34,7 @@ import RatingSimulator from './components/RatingSimulator';
 import MatchManager from './components/MatchManager';
 import ConfigManager from './components/ConfigManager';
 import MatchReporter from './components/MatchReporter';
+import MatchBrowser from './components/MatchBrowser';
 import MatchmakingPanel from './components/MatchmakingPanel';
 import RankingsView from './components/RankingsView';
 
@@ -60,6 +62,7 @@ export default function App() {
     { id: 'database', label: 'Database', icon: <Dns /> },
     { id: 'match', label: 'Match Manager', icon: <History /> },
     { id: 'reporter', label: 'Match Reporter', icon: <BugReport /> },
+    { id: 'browser', label: 'Match Browser', icon: <ViewList /> },
     { id: 'matchmaking', label: 'Matchmaking', icon: <Groups /> },
     { id: 'rankings', label: 'Rankings & History', icon: <EmojiEvents /> },
     { id: 'rating', label: 'Rating Simulator', icon: <Calculate /> },
@@ -76,6 +79,8 @@ export default function App() {
         return <MatchManager />;
       case 'reporter':
         return <MatchReporter />;
+      case 'browser':
+        return <MatchBrowser />;
       case 'matchmaking':
         return <MatchmakingPanel />;
       case 'rankings':

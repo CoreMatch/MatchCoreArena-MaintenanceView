@@ -114,6 +114,31 @@ func (a *App) GetMatchByID(id int64) (models.Match, error) {
 	return a.svc.GetMatchByID(a.ctx, id)
 }
 
+// ListMatches 全局对局查询（仅 OPS，分页 + 过滤，按结束时间倒序）
+func (a *App) ListMatches(q models.MatchListQuery) ([]models.Match, error) {
+	if a.svc == nil {
+		return nil, fmt.Errorf("service not initialized")
+	}
+	return a.svc.ListMatches(a.ctx, q)
+}
+
+// GetMatchByGameID 按幂等键 game_id 直查对局（仅 OPS）
+func (a *App) GetMatchByGameID(gameID string) (models.Match, error) {
+	if a.svc == nil {
+		return models.Match{}, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetMatchByGameID(a.ctx, gameID)
+}
+
+// GetMatchRejections 获取服务端拒绝记录快照（仅 OPS；服务端进程内
+// 200 条环形，重启清空）
+func (a *App) GetMatchRejections() ([]models.RejectionRecord, error) {
+	if a.svc == nil {
+		return nil, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetMatchRejections(a.ctx)
+}
+
 // JoinMatchmaking 加入匹配队列（身份为后端服务令牌对应的 UID）；
 // partyMembers 为组队预留字段，服务端契约确定前仅在非空时随请求发送
 func (a *App) JoinMatchmaking(matchType string, partyMembers []string) (models.QueueEntry, error) {

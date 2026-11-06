@@ -133,6 +133,8 @@ type TeamReportInput struct {
 }
 
 // ParticipantDetail 对局参与者明细（含本局评分变动），随对局详情返回。
+// RankScoreAfter 由服务端契约 v1.5.0 起直接返回；旧响应可能缺失（零值），
+// 展示侧此时按 max(0, before+delta) 回退。
 type ParticipantDetail struct {
 	UID             int64  `json:"uid"`
 	TeamID          string `json:"team_id"`
@@ -140,17 +142,21 @@ type ParticipantDetail struct {
 	IsDraw          bool   `json:"is_draw"`
 	RankScoreBefore int    `json:"rank_score_before"`
 	RankScoreDelta  int    `json:"rank_score_delta"`
+	RankScoreAfter  int    `json:"rank_score_after"`
 	SurvivalTime    int    `json:"survival_time"`
 	Kills           int    `json:"kills"`
 	Deaths          int    `json:"deaths"`
 }
 
 // Match 对局记录。时间字段按服务端返回的字符串原样承载。
+// ServerID/GameID 为契约 v1.5.0 新增（game_id 是上报方幂等键）。
 type Match struct {
 	ID              int64               `json:"id"`
 	MatchType       string              `json:"match_type"`
 	Source          string              `json:"source"`
 	MapName         string              `json:"map_name"`
+	ServerID        string              `json:"server_id"`
+	GameID          string              `json:"game_id"`
 	WinnerTeamID    string              `json:"winner_team_id"`
 	SurvivalRate    float64             `json:"survival_rate"`
 	DurationSeconds int                 `json:"duration_seconds"`
@@ -158,6 +164,28 @@ type Match struct {
 	FinishedAt      string              `json:"finished_at"`
 	CreatedAt       string              `json:"created_at"`
 	Participants    []ParticipantDetail `json:"participants,omitempty"`
+}
+
+// MatchListQuery GET /api/matches 的查询参数（OPS 全局浏览）。
+// 空串/零值字段不随请求发送；分页由服务端归一（page_size 上限 100）。
+type MatchListQuery struct {
+	Source       string `json:"source"`
+	MapName      string `json:"map_name"`
+	GameID       string `json:"game_id"`
+	UID          int64  `json:"uid"`
+	FinishedFrom string `json:"finished_from"`
+	FinishedTo   string `json:"finished_to"`
+	PageNum      int    `json:"page_num"`
+	PageSize     int    `json:"page_size"`
+}
+
+// RejectionRecord 服务端进程内拒绝环的一条记录
+// （GET /api/matches/rejections；仅服务端本进程、重启清空）。
+type RejectionRecord struct {
+	Time   string `json:"time"`
+	Code   string `json:"code"`
+	GameID string `json:"game_id"`
+	Reason string `json:"reason"`
 }
 
 // QueueEntry 匹配队列条目。

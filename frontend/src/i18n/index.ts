@@ -143,6 +143,44 @@ const messages = {
     'reqlog.status': 'Status',
     'reqlog.code': 'Code',
 
+    // ── Match Browser (OPS read-only queries, contract v1.5.0) ──
+    'browser.title': 'Match Browser',
+    'browser.intro':
+      'OPS-only read-only queries (contract v1.5.0): global match list with filters, direct lookup by the game_id idempotency key, and the server-side rejection ring.',
+    'browser.list.title': 'All matches',
+    'browser.list.intro': 'Sorted by finish time (newest first); entries carry the same shape as the match detail.',
+    'browser.filter.source': 'source (any/game/virtual)',
+    'browser.filter.map': 'map_name',
+    'browser.filter.gameId': 'game_id',
+    'browser.filter.uid': 'participant uid',
+    'browser.filter.from': 'finished_from (RFC3339)',
+    'browser.filter.to': 'finished_to (RFC3339)',
+    'browser.pageSize': 'page size',
+    'browser.load': 'Query',
+    'browser.loading': 'Loading...',
+    'browser.empty': 'No matches found for these filters.',
+    'browser.page': 'Page',
+    'browser.prev': 'Previous',
+    'browser.next': 'Next',
+    'browser.lookup.title': 'Look up by game_id',
+    'browser.lookup.intro':
+      'Direct lookup by the reporter-supplied idempotency key — handy for replay/conflict investigations.',
+    'browser.lookup.button': 'Look up',
+    'browser.lookup.empty': 'Enter a game_id to look up.',
+    'browser.rejections.title': 'Report rejections',
+    'browser.rejections.note':
+      'In-process ring on the server: last 200 entries only, cleared on server restart.',
+    'browser.rejections.refresh': 'Refresh',
+    'browser.rejections.empty': 'No rejections recorded.',
+    'browser.detail.title': 'Settlement detail',
+    'browser.detail.hint': 'Select a match above (or look one up) to see its settlement.',
+    'browser.detail.match': 'Match',
+    'table.gameId': 'game_id',
+    'table.serverId': 'server_id',
+    'table.finishedAt': 'Finished',
+    'table.reason': 'Reason',
+    'table.winner': 'Winner',
+
     // ── Rankings & History ──
     'rankings.title': 'Rankings & History',
     'rankings.intro':

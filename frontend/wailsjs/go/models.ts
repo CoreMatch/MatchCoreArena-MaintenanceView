@@ -389,6 +389,7 @@ export namespace models {
 	    is_draw: boolean;
 	    rank_score_before: number;
 	    rank_score_delta: number;
+	    rank_score_after: number;
 	    survival_time: number;
 	    kills: number;
 	    deaths: number;
@@ -405,6 +406,7 @@ export namespace models {
 	        this.is_draw = source["is_draw"];
 	        this.rank_score_before = source["rank_score_before"];
 	        this.rank_score_delta = source["rank_score_delta"];
+	        this.rank_score_after = source["rank_score_after"];
 	        this.survival_time = source["survival_time"];
 	        this.kills = source["kills"];
 	        this.deaths = source["deaths"];
@@ -415,6 +417,8 @@ export namespace models {
 	    match_type: string;
 	    source: string;
 	    map_name: string;
+	    server_id: string;
+	    game_id: string;
 	    winner_team_id: string;
 	    survival_rate: number;
 	    duration_seconds: number;
@@ -433,6 +437,8 @@ export namespace models {
 	        this.match_type = source["match_type"];
 	        this.source = source["source"];
 	        this.map_name = source["map_name"];
+	        this.server_id = source["server_id"];
+	        this.game_id = source["game_id"];
 	        this.winner_team_id = source["winner_team_id"];
 	        this.survival_rate = source["survival_rate"];
 	        this.duration_seconds = source["duration_seconds"];
@@ -678,6 +684,50 @@ export namespace models {
 	        this.reporter_configured = source["reporter_configured"];
 	        this.using_fallback = source["using_fallback"];
 	        this.upstream_url = source["upstream_url"];
+	    }
+	}
+	export class MatchListQuery {
+	    source: string;
+	    map_name: string;
+	    game_id: string;
+	    uid: number;
+	    finished_from: string;
+	    finished_to: string;
+	    page_num: number;
+	    page_size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MatchListQuery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.map_name = source["map_name"];
+	        this.game_id = source["game_id"];
+	        this.uid = source["uid"];
+	        this.finished_from = source["finished_from"];
+	        this.finished_to = source["finished_to"];
+	        this.page_num = source["page_num"];
+	        this.page_size = source["page_size"];
+	    }
+	}
+	export class RejectionRecord {
+	    time: string;
+	    code: string;
+	    game_id: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RejectionRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.time = source["time"];
+	        this.code = source["code"];
+	        this.game_id = source["game_id"];
+	        this.reason = source["reason"];
 	    }
 	}
 

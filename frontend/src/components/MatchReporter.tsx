@@ -86,9 +86,13 @@ function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-// Same floor as the server settlement: max(0, before + delta).
-function scoreAfter(before: number, delta: number): number {
-  return Math.max(0, before + delta);
+// Prefer the server-provided after (contract v1.5.0); fall back to the
+// server's floor formula max(0, before + delta) for older responses.
+function participantAfter(p: models.ParticipantDetail): number {
+  if (typeof p.rank_score_after === 'number' && !Number.isNaN(p.rank_score_after)) {
+    return p.rank_score_after;
+  }
+  return Math.max(0, p.rank_score_before + p.rank_score_delta);
 }
 
 // ── field-level validation (blocks submission; messages are i18n English) ──
@@ -714,7 +718,7 @@ export default function MatchReporter() {
                             {p.rank_score_delta >= 0 ? '+' : ''}
                             {p.rank_score_delta}
                           </TableCell>
-                          <TableCell>{scoreAfter(p.rank_score_before, p.rank_score_delta)}</TableCell>
+                          <TableCell>{participantAfter(p)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

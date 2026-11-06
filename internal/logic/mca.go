@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,6 +46,8 @@ var mcaErrorCodeMessages = map[string]string{
 	"mca_user_not_provisioned": "Participant account cannot be provisioned locally (UID held by a soft-deleted row); the whole match was rolled back",
 	"mca_invalid_request":      "Invalid request parameters (check team/member structure and timestamp format)",
 	"mca_match_not_found":      "Match does not exist",
+	"mca_report_inconsistent":  "Report rejected: the match data is self-inconsistent (teams/results/counts/timestamps)",
+	"mca_game_id_conflict":     "game_id was already recorded with a different payload (idempotency conflict)",
 	"mca_queue_already_joined": "This identity is already in the matchmaking queue (one entry per identity)",
 	"mca_queue_not_joined":     "This identity is not in the matchmaking queue",
 	"oauth_insufficient_scope": "Reporting requires an OPS token with the match:report scope.",
@@ -246,6 +250,101 @@ func (s *MaintenanceService) GetMatchByID(ctx context.Context, id int64) (models
 		return empty, fmt.Errorf("failed to parse match detail: %w", err)
 	}
 	return match, nil
+}
+
+// ─── OPS 只读查询（契约 v1.5.0：全局浏览 / game_id 直查 / 拒绝记录）───
+
+// ListMatches 全局对局查询（GET /api/matches，仅 OPS）：分页 + 过滤，
+// 按 finished_at 倒序，条目与单局详情同形状（含参与者明细）。
+func (s *MaintenanceService) ListMatches(ctx context.Context, q models.MatchListQuery) ([]models.Match, error) {
+	params := url.Values{}
+	if v := strings.TrimSpace(q.Source); v != "" {
+		params.Set("source", v)
+	}
+	if v := strings.TrimSpace(q.MapName); v != "" {
+		params.Set("map_name", v)
+	}
+	if v := strings.TrimSpace(q.GameID); v != "" {
+		params.Set("game_id", v)
+	}
+	if q.UID != 0 {
+		params.Set("uid", strconv.FormatInt(q.UID, 10))
+	}
+	if v := strings.TrimSpace(q.FinishedFrom); v != "" {
+		params.Set("finished_from", v)
+	}
+	if v := strings.TrimSpace(q.FinishedTo); v != "" {
+		params.Set("finished_to", v)
+	}
+	pageNum := q.PageNum
+	if pageNum <= 0 {
+		pageNum = 1
+	}
+	pageSize := q.PageSize
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+	params.Set("page_num", strconv.Itoa(pageNum))
+	params.Set("page_size", strconv.Itoa(pageSize))
+
+	data, err := s.doMCARequest(ctx, http.MethodGet, "/api/matches?"+params.Encode(), nil, s.serviceToken())
+	if err != nil {
+		return nil, err
+	}
+	if string(data) == "null" || len(data) == 0 {
+		return []models.Match{}, nil
+	}
+
+	var matches []models.Match
+	if err := json.Unmarshal(data, &matches); err != nil {
+		return nil, fmt.Errorf("failed to parse match list: %w", err)
+	}
+	if matches == nil {
+		matches = []models.Match{}
+	}
+	return matches, nil
+}
+
+// GetMatchByGameID 按幂等键直查对局（GET /api/matches/by-game-id/{game_id}，
+// 仅 OPS）；未命中时上游返回 404 mca_match_not_found（经翻译可读）。
+func (s *MaintenanceService) GetMatchByGameID(ctx context.Context, gameID string) (models.Match, error) {
+	var empty models.Match
+	if strings.TrimSpace(gameID) == "" {
+		return empty, fmt.Errorf("game_id must not be empty")
+	}
+
+	path := "/api/matches/by-game-id/" + url.PathEscape(strings.TrimSpace(gameID))
+	data, err := s.doMCARequest(ctx, http.MethodGet, path, nil, s.serviceToken())
+	if err != nil {
+		return empty, err
+	}
+
+	var match models.Match
+	if err := json.Unmarshal(data, &match); err != nil {
+		return empty, fmt.Errorf("failed to parse match detail: %w", err)
+	}
+	return match, nil
+}
+
+// GetMatchRejections 获取服务端进程内拒绝环快照（GET /api/matches/rejections，
+// 仅 OPS）：最近 200 条，服务端重启即清空。返回顺序为最旧在前，展示侧倒序。
+func (s *MaintenanceService) GetMatchRejections(ctx context.Context) ([]models.RejectionRecord, error) {
+	data, err := s.doMCARequest(ctx, http.MethodGet, "/api/matches/rejections", nil, s.serviceToken())
+	if err != nil {
+		return nil, err
+	}
+	if string(data) == "null" || len(data) == 0 {
+		return []models.RejectionRecord{}, nil
+	}
+
+	var records []models.RejectionRecord
+	if err := json.Unmarshal(data, &records); err != nil {
+		return nil, fmt.Errorf("failed to parse rejection records: %w", err)
+	}
+	if records == nil {
+		records = []models.RejectionRecord{}
+	}
+	return records, nil
 }
 
 // ─── 匹配（以当前服务令牌对应的身份操作）───

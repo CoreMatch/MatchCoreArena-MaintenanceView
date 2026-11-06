@@ -18,6 +18,14 @@ export function GetMatchByID(arg1) {
   return window['go']['main']['App']['GetMatchByID'](arg1);
 }
 
+export function GetMatchByGameID(arg1) {
+  return window['go']['main']['App']['GetMatchByGameID'](arg1);
+}
+
+export function GetMatchRejections() {
+  return window['go']['main']['App']['GetMatchRejections']();
+}
+
 export function GetMatchmakingStatus() {
   return window['go']['main']['App']['GetMatchmakingStatus']();
 }
@@ -60,6 +68,10 @@ export function JoinMatchmaking(arg1, arg2) {
 
 export function LeaveMatchmaking() {
   return window['go']['main']['App']['LeaveMatchmaking']();
+}
+
+export function ListMatches(arg1) {
+  return window['go']['main']['App']['ListMatches'](arg1);
 }
 
 export function ReportMatch(arg1) {
