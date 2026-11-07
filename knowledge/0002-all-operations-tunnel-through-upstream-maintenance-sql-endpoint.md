@@ -26,8 +26,8 @@ helper):
 
 The local MySQL and Redis clients are still constructed at startup but are
 deliberately unused (code comment: kept "in case they are needed later").
-Direct Redis access is hard-disabled: `GetRedisKeys` and `DeleteRedisKey`
-return errors unconditionally.
+Direct Redis access no longer exists: the former `GetRedisKeys` and
+`DeleteRedisKey` methods were first hard-disabled and later removed entirely.
 
 ## Consequences
 - The tool works from any network location that can reach the upstream and
@@ -49,7 +49,7 @@ return errors unconditionally.
 ## Evidence
 - internal/logic/maintenance.go::NewMaintenanceService — db/redis clients initialized but unused (comment inside NewMaintenanceService)
 - internal/logic/maintenance.go::executeSQL — `executeSQL` helper posting `{"sql": ...}` to `/api/maintenance/sql`
-- internal/logic/maintenance.go::GetRedisKeys — Redis methods hard-disabled with error returns
+- (removed) former internal/logic/maintenance.go GetRedisKeys / DeleteRedisKey — hard-disabled first, then deleted; no direct Redis surface remains
 - internal/logic/maintenance.go::GetUsers, internal/logic/maintenance.go::UpdateUserRankScore — GetUsers / UpdateUserRankScore SQL
 - internal/logic/maintenance.go::GetSystemStats, internal/logic/maintenance.go::UploadMatchResult — GetSystemStats / UploadMatchResult SQL
 - /home/lnb/Desktop/HA/HA-Contract/docs/api/openapi/matchcorearena-business.yaml (field: /api/maintenance/sql) — contract for `/api/maintenance/sql`

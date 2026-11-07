@@ -62,7 +62,7 @@ Dead or broken paths:
     token; without them the operator sees "—" plus a one-line hint, not data.
 
 ## Evidence
-- internal/logic/maintenance.go::GetRedisKeys — Redis methods hard-disabled
+- (removed) former internal/logic/maintenance.go GetRedisKeys / DeleteRedisKey — hard-disabled first, then deleted entirely
 - internal/logic/maintenance.go::GetUsers — GetUsers with hard-coded LIMIT 100
 - internal/logic/maintenance.go::GetSystemStats — Total Users count via maintenance SQL (Active Matches / Redis Keys are no longer surfaced)
 - internal/logic/mca.go::GetMetrics — OPS metrics proxy (`GET /api/metrics`) returning `MetricsSnapshot{counters, queue_depth}`
@@ -71,7 +71,7 @@ Dead or broken paths:
 - frontend/src/i18n/index.ts::dashboard.metricsUnavailable — hint shown when metrics cannot be loaded
 - internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult aligned with the baseline matches schema (entry 0007)
 - internal/models/models.go::MatchResult — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
-- frontend/src/components/RedisBrowser.tsx::GetRedisKeys — UI still calls the disabled backend
+- (removed) former frontend/src/components/RedisBrowser.tsx — deleted together with the backend Redis methods; no Redis UI remains
 - frontend/src/components/MatchManager.tsx::match_id — form fields and submit path
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults
 - /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)
