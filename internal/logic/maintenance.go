@@ -130,16 +130,6 @@ func (s *MaintenanceService) GetConfig() *models.Config {
 	return s.cfg
 }
 
-// GetRedisKeys 获取 Redis 键列表 (目前 API 仍不支持，除非通过特定的运维 SQL 查询系统表，暂保持原样或说明)
-func (s *MaintenanceService) GetRedisKeys(ctx context.Context, pattern string) ([]models.RedisKey, error) {
-	return nil, fmt.Errorf("direct redis access is disabled; please use management SQL if needed for database queries")
-}
-
-// DeleteRedisKey 删除 Redis 键
-func (s *MaintenanceService) DeleteRedisKey(ctx context.Context, key string) error {
-	return fmt.Errorf("direct redis access is disabled")
-}
-
 // GetUsers 获取用户列表 (通过运维 SQL 获取完整数据)
 func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error) {
 	query := "SELECT uid, level, experience, rank_score, wins_count, created_at FROM users WHERE deleted_at IS NULL LIMIT 100"
@@ -157,8 +147,10 @@ func (s *MaintenanceService) GetUsers(ctx context.Context) ([]models.User, error
 }
 
 // UpdateUserRankScore 更新用户分数 (通过运维 SQL 直接修正)
+// 与服务端结算路径同口径：积分下限为 0（GREATEST(0, ...)），
+// 运维修正不得把 rank_score 写成负数。
 func (s *MaintenanceService) UpdateUserRankScore(ctx context.Context, uid int64, score int) error {
-	query := fmt.Sprintf("UPDATE users SET rank_score = %d WHERE uid = %d", score, uid)
+	query := fmt.Sprintf("UPDATE users SET rank_score = GREATEST(0, %d) WHERE uid = %d", score, uid)
 	_, err := s.executeSQL(ctx, query)
 	return err
 }
@@ -178,17 +170,9 @@ func (s *MaintenanceService) GetSystemStats(ctx context.Context) (models.SystemS
 		}
 	}
 
-	// 2. 获取 Redis 键总数 (如果后端支持通过 SQL 查询监控数据，否则仍为 0)
-	// 3. 获取活跃对局数
-	matchData, err := s.executeSQL(ctx, "SELECT COUNT(*) as count FROM matches WHERE finished_at IS NULL")
-	if err == nil {
-		var res []map[string]interface{}
-		if json.Unmarshal(matchData, &res) == nil && len(res) > 0 {
-			if count, ok := res[0]["count"].(float64); ok {
-				stats.ActiveMatches = int64(count)
-			}
-		}
-	}
+	// 活跃对局/Redis 键计数已移除：baseline schema 中 finished_at 为
+	// NOT NULL，“进行中”无法表达，旧计数恒为 0；面板的队列/对局实时
+	// 数字改由 OPS metrics 代理提供（knowledge 0009）。
 
 	return stats, nil
 }
@@ -201,8 +185,10 @@ func (s *MaintenanceService) UploadMatchResult(ctx context.Context, result model
 		winInc = 1
 	}
 
+	// 与服务端结算路径同口径：积分下限为 0（GREATEST(0, ...)），
+	// 手动上传不得把 rank_score 写成负数。
 	updateUserSQL := fmt.Sprintf(
-		"UPDATE users SET rank_score = rank_score + %d, wins_count = wins_count + %d WHERE uid = %d",
+		"UPDATE users SET rank_score = GREATEST(0, rank_score + %d), wins_count = wins_count + %d WHERE uid = %d",
 		result.ScoreDelta, winInc, result.UID,
 	)
 	_, err := s.executeSQL(ctx, updateUserSQL)

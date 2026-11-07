@@ -29,44 +29,58 @@ The statement is verified by executing it against a local MariaDB in strict
 mode running the current baseline schema; the INSERT and the preceding users
 UPDATE both succeed.
 
-### Open items — requires author decision
+### Settled items (2026-11-08, leftover-cleanup batch)
 
-1. **Manual upload semantics beyond executability**: the INSERT writes
-   `winner_uid = UID` unconditionally (even when `is_winner` is false); the
-   score delta is applied to `users.rank_score` but is not recorded in
-   `matches` or `match_participants`; the `match_id`, `rank` and
-   `survivor_count` fields collected by the UI are ignored by the backend.
-   The whole manual-upload path needs a design decision (align with the
-   server's report semantics or remain an ad-hoc SQL tool).
-2. **No score floor on manual updates**: the server's report path uses
-   `GREATEST(0, rank_score + delta)`; the manual UPDATE here can drive
-   `rank_score` negative. Whether the ops tool should mirror the floor is
-   open.
-3. **Redis browser page is dead**: the backend hard-disables the Redis
-   client, but the UI page is kept. Restore direct Redis access or remove
-   the page — needs intent.
-4. **Dashboard stats are structurally zero**: `TotalRedisKeys` has no data
-   source; `ActiveMatches` counts `matches WHERE finished_at IS NULL`, but
-   `finished_at` is NOT NULL in the schema, so the count is always 0. The
-   definition of "active match" needs a decision.
-5. **No tests in the repository**: adding a test framework is deferred
-   (explicitly by the author).
-6. **README is still the default Wails template text**: rewriting it is
-   content creation, deferred.
-7. **`config.yaml` committed with a placeholder `management_token`** and not
-   gitignored (nor `config_history/`): deployment convention, deferred.
-8. **HA-Contract vendored as a symlink to a local absolute path**:
-   distribution method, deferred (explicitly by the author).
-9. **Rating algorithm duplicated from the server**: whether to share one
-   implementation or add cross-repo consistency checks, deferred
-   (explicitly by the author).
-10. **mysql/redis clients initialized but idle**: kept per the in-code
-    comment "in case they are needed later"; whether to remove them is open.
+1. **Manual upload semantics** — settled: the manual-upload page remains an
+   **ad-hoc emergency SQL tool**, not a second report path. Aligning it with
+   the server's report semantics is moot because the Match Reporter page
+   already is the aligned path (regular reporting endpoint, contract
+   v1.4.0). The ad-hoc semantics are therefore documented as-is:
+   `winner_uid = UID` unconditionally (a losing 1v1 upload cannot name the
+   absent opponent), score delta applied only to `users.rank_score`, and
+   the UI-collected `match_id`/`rank`/`survivor_count` ignored. Operators
+   use it knowingly for bare corrections; the root `PENDING-DECISIONS.md`
+   item 3 records the keep-or-delete decision (keep).
+2. **Score floor** — settled and implemented: both manual statements now
+   mirror the server's floor, `rank_score = GREATEST(0, rank_score + delta)`
+   in `UploadMatchResult` and `rank_score = GREATEST(0, value)` in
+   `UpdateUserRankScore`, so ops corrections can no longer drive
+   `rank_score` negative.
+3. **Redis browser page** — settled: the dead page is **removed**
+   (frontend component, nav entry, i18n strings, the `GetRedisKeys`/
+   `DeleteRedisKey` bindings and service methods, and `models.RedisKey`).
+   Restoring direct Redis access stays rejected: all data operations tunnel
+   through the upstream maintenance SQL endpoint by design (entry 0002), so
+   the page could never work; keeping it only advertised a dead surface.
+4. **Dashboard stats** — settled: the structurally zero counters are
+   **removed** (`SystemStats.ActiveMatches`/`RedisKeys` and the
+   `matches WHERE finished_at IS NULL` query). "Active match" is not
+   representable in the baseline schema (`finished_at` NOT NULL), so no
+   definition was invented; the dashboard's live queue/match numbers come
+   from the OPS metrics proxy (entry 0009) and degrade to "—" when
+   unavailable.
+
+### Closed without change (author-deferred or keep, recorded 2026-11-08)
+
+5. **No tests in the repository** — closed as author-deferred (explicit
+   author decision); no test framework added.
+6. **README is still the default Wails template text** — closed as
+   deferred content creation.
+7. **`config.yaml` committed with a placeholder `management_token`** —
+   closed as a deployment convention, deferred.
+8. **HA-Contract vendored as a symlink to a local absolute path** — closed
+   as author-deferred distribution method.
+9. **Rating algorithm duplicated from the server** — closed as
+   author-deferred (entry 0003 documents the local copy).
+10. **mysql/redis clients initialized but idle** — closed as **keep**: the
+    in-code intent ("in case they are needed later") is an explicit keep
+    rationale and the idle clients carry no risk.
 
 ## Consequences
-- The upload path executes end to end against the baseline schema.
-- The open items above each need a semantic or design choice; they stay
-  listed here until decided.
+- The upload path executes end to end against the baseline schema, with
+  the server-aligned score floor.
+- No open items remain in this entry; product-level MCA questions live in
+  the root `PENDING-DECISIONS.md`.
 
 ## Evidence
 - internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult with the baseline-schema INSERT
