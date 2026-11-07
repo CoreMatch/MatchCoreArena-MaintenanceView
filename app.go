@@ -43,22 +43,6 @@ func (a *App) GetConfig() *models.Config {
 	return a.cfg
 }
 
-// GetRedisKeys 获取 Redis 键
-func (a *App) GetRedisKeys(pattern string) ([]models.RedisKey, error) {
-	if a.svc == nil {
-		return nil, fmt.Errorf("service not initialized")
-	}
-	return a.svc.GetRedisKeys(a.ctx, pattern)
-}
-
-// DeleteRedisKey 删除 Redis 键
-func (a *App) DeleteRedisKey(key string) error {
-	if a.svc == nil {
-		return fmt.Errorf("service not initialized")
-	}
-	return a.svc.DeleteRedisKey(a.ctx, key)
-}
-
 // GetUsers 获取用户列表
 func (a *App) GetUsers() ([]models.User, error) {
 	if a.svc == nil {

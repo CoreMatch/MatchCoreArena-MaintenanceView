@@ -14,10 +14,9 @@ import {
   ThemeProvider,
   createTheme
 } from '@mui/material';
-import { 
-  Dashboard as DashboardIcon, 
-  Storage, 
-  Dns, 
+import {
+  Dashboard as DashboardIcon,
+  Dns,
   Calculate,
   History,
   Settings,
@@ -29,7 +28,6 @@ import {
 
 import { t } from './i18n';
 import Dashboard from './components/Dashboard';
-import RedisBrowser from './components/RedisBrowser';
 import DatabaseManager from './components/DatabaseManager';
 import RatingSimulator from './components/RatingSimulator';
 import MatchManager from './components/MatchManager';
@@ -59,7 +57,6 @@ export default function App() {
 
   const menuItems = [
     { id: 'dashboard', label: t().nav.dashboard, icon: <DashboardIcon /> },
-    { id: 'redis', label: t().nav.redis, icon: <Storage /> },
     { id: 'database', label: t().nav.database, icon: <Dns /> },
     { id: 'match', label: t().nav.match, icon: <History /> },
     { id: 'reporter', label: t().nav.reporter, icon: <BugReport /> },
@@ -72,8 +69,6 @@ export default function App() {
 
   const renderContent = () => {
     switch (selectedView) {
-      case 'redis':
-        return <RedisBrowser />;
       case 'database':
         return <DatabaseManager />;
       case 'match':

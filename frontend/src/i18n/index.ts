@@ -17,7 +17,6 @@ const en = {
   },
   nav: {
     dashboard: 'Dashboard',
-    redis: 'Redis Browser',
     database: 'Database',
     match: 'Match Manager',
     reporter: 'Match Reporter',
@@ -337,21 +336,6 @@ const en = {
     survivalWeight: 'Survival Weight:',
     streakWeight: 'Streak Weight:',
     perfWeight: 'Perf Weight:',
-  },
-
-  // ── Redis Browser ──
-  redis: {
-    title: 'Redis Browser',
-    pattern: 'Pattern',
-    search: 'Search',
-    key: 'Key',
-    type: 'Type',
-    ttl: 'TTL (s)',
-    actions: 'Actions',
-    value: 'Value:',
-    emptyUnsupported: '(Empty or Unsupported Type)',
-    close: 'Close',
-    confirmDelete: 'Delete key',
   },
 
   // ── Database Manager ──

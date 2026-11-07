@@ -12,14 +12,6 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// RedisKey Redis 键值对模型
-type RedisKey struct {
-	Key   string `json:"key"`
-	Type  string `json:"type"`
-	TTL   int64  `json:"ttl"`
-	Value string `json:"value"`
-}
-
 // RatingSimInput 积分模拟输入
 type RatingSimInput struct {
 	PlayerRating   float64 `json:"player_rating"`
@@ -43,10 +35,10 @@ type RatingSimResult struct {
 }
 
 // SystemStats 系统统计信息
+// 仅保留有真实数据源的计数；队列/对局实时数字由 OPS metrics 代理提供
+// （knowledge 0009），结构恒零的 active_matches/redis_keys 已移除。
 type SystemStats struct {
-	TotalUsers    int64 `json:"total_users"`
-	ActiveMatches int64 `json:"active_matches"`
-	RedisKeys     int64 `json:"redis_keys"`
+	TotalUsers int64 `json:"total_users"`
 }
 
 // MatchResult 对局战绩模型
