@@ -53,4 +53,4 @@ Direct Redis access no longer exists: the former `GetRedisKeys` and
 - internal/logic/maintenance.go::GetUsers, internal/logic/maintenance.go::UpdateUserRankScore — GetUsers / UpdateUserRankScore SQL
 - internal/logic/maintenance.go::GetSystemStats, internal/logic/maintenance.go::UploadMatchResult — GetSystemStats / UploadMatchResult SQL
 - /home/lnb/Desktop/HA/HA-Contract/docs/api/openapi/matchcorearena-business.yaml (field: /api/maintenance/sql) — contract for `/api/maintenance/sql`
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/maintenance.go::ExecuteSQL — server executes raw SQL (Query, fallback Exec)
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/internal/service/maintenance.go::ExecuteSQL — server executes raw SQL (Query, fallback Exec)

@@ -58,8 +58,8 @@ The tool is an operator-only console, and its identity model reflects that:
 - internal/logic/maintenance.go::ManagementToken — Bearer header set from `ManagementToken`
 - frontend/src/App.tsx::menuItems — admin-only menu items; frontend/src/App.tsx::Panel — "MCA Maintenance Panel" header
 - frontend/src/components/ConfigManager.tsx::password — token edited as a password field
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/auth/verifier.go::Verify — management token maps to UID -1, scopes ["maintenance"]
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/middleware/auth.go::HasScope — `HasScope`: maintenance implies all scopes
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/maintenance.go::ExecuteSQL — ExecuteSQL requires the maintenance scope
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/router.go::Register — `api.POST("/maintenance/sql", ...)` inside the authenticated group
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/internal/auth/verifier.go::Verify — management token maps to UID -1, scopes ["maintenance"]
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/middleware/auth.go::HasScope — `HasScope`: maintenance implies all scopes
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/handler/maintenance.go::ExecuteSQL — ExecuteSQL requires the maintenance scope
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/router.go::Register — `api.POST("/maintenance/sql", ...)` inside the authenticated group
 - .trae/rules/docs.md::HA-Contract — HA-Contract is the sole documentation authority

@@ -84,4 +84,4 @@ UPDATE both succeed.
 
 ## Evidence
 - internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult with the baseline-schema INSERT
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema used as the reference (read-only cross-repo check)
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema used as the reference (read-only cross-repo check)

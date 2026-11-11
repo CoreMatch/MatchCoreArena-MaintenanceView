@@ -138,8 +138,8 @@ already tunnels data operations through the upstream maintenance endpoint
 - frontend/src/components/MatchBrowser.tsx::loadMetrics — read-only Server Metrics card with stable key order
 - frontend/src/components/RankingsView.tsx::loadRankings — read-only rankings and history
 - frontend/src/i18n/index.ts::validation.matchType — English-first centralized copy dictionary
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/match.go::Report — `match:report` scope gate on the endpoint
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/middleware/auth.go::HasScope — maintenance scope implies match:report
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/matchmaking.go::QueueStats — server-side queue stats shape
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/internal/service/matchmaking.go::JoinTarget — server-side join target shape
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/api/handler/metrics.go::Metrics — OPS-only metrics endpoint
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/handler/match.go::Report — `match:report` scope gate on the endpoint
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/middleware/auth.go::HasScope — maintenance scope implies match:report
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/internal/service/matchmaking.go::QueueStats — server-side queue stats shape
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/internal/service/matchmaking.go::JoinTarget — server-side join target shape
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/api/handler/metrics.go::Metrics — OPS-only metrics endpoint

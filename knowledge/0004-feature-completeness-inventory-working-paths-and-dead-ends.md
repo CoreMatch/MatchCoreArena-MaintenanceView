@@ -73,5 +73,5 @@ Dead or broken paths:
 - internal/models/models.go::MatchResult — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
 - (removed) former frontend/src/components/RedisBrowser.tsx — deleted together with the backend Redis methods; no Redis UI remains
 - frontend/src/components/MatchManager.tsx::match_id — form fields and submit path
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults
-- /home/lnb/Desktop/HA/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults
+- /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)
