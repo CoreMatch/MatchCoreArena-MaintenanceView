@@ -228,7 +228,8 @@ export default function MatchmakingPanel() {
                   <Paper key={g.group_id} variant="outlined" sx={{ p: 1.5, mb: 1 }}>
                     <Typography variant="body2">
                       {t().matchmaking.group} #{g.group_id} · {g.match_type} · {t().matchmaking.formedAt}{' '}
-                      {g.formed_at} · {t().matchmaking.joinTarget} {joinTargetText(g.join_target)}
+                      {g.formed_at} · {t().matchmaking.joinTarget} {joinTargetText(g.join_target)} ·{' '}
+                      {t().matchmaking.room} {g.room || '—'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {(g.members || [])

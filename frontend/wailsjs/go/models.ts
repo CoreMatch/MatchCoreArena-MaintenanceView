@@ -150,6 +150,7 @@ export namespace models {
 	    formed_at: string;
 	    members: GroupMember[];
 	    join_target?: JoinTarget;
+	    room?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new FormedGroup(source);
@@ -162,6 +163,7 @@ export namespace models {
 	        this.formed_at = source["formed_at"];
 	        this.members = this.convertValues(source["members"], GroupMember);
 	        this.join_target = this.convertValues(source["join_target"], JoinTarget);
+	        this.room = source["room"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
