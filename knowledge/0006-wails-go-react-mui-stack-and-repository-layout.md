@@ -34,8 +34,10 @@ config logic, distributable to individual operators without hosting anything.
   - The frontend must be built before the Go binary embeds it, and the
     committed generated bindings can drift from `app.go` if regeneration is
     forgotten after changing bound methods.
-  - `recharts` and `lucide-react` are declared in `package.json` but never
-    imported anywhere under `frontend/src` — dead dependencies.
+  - `recharts` and `lucide-react` were originally declared but never
+    imported; both were dropped from `package.json` on 2026-11-11
+    (dead-dependency cleanup), so the runtime dep set is now exactly
+    React 19, MUI 9 (via `@mui/material`), Emotion, and `react-dom`.
   - The root README.md is still the stock Wails template text and does not
     describe this tool.
 
@@ -43,7 +45,7 @@ config logic, distributable to individual operators without hosting anything.
 - go.mod (field: module) — module name, Go 1.25.0, direct dependencies
 - main.go::assets — embed of frontend/dist, Wails options, bound App
 - wails.json (field: build:tags) — project config incl. `build:tags: webkit2_41`
-- frontend/package.json (field: recharts) — React 19, MUI 9, Vite 7, recharts, lucide-react
+- frontend/package.json (field: dependencies) — React 19, MUI 9, Vite 7
 - frontend/src/App.tsx::menuItems — imports, theme, sidebar menu
 - app.go::App — full Wails-bound method surface
 - frontend/wailsjs/go/main/App.d.ts::SimulateRating — generated binding surface
