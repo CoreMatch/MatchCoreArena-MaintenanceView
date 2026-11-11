@@ -6,6 +6,8 @@ export function GetConfig():Promise<models.Config>;
 
 export function GetConfigHistory():Promise<Array<models.ConfigHistoryItem>>;
 
+export function GetMatchAssignment(arg1:string):Promise<models.MatchAssignment>;
+
 export function GetMatchByGameID(arg1:string):Promise<models.Match>;
 
 export function GetMatchByID(arg1:number):Promise<models.Match>;

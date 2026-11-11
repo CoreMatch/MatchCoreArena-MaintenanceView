@@ -148,6 +148,14 @@ func (a *App) GetMatchmakingStatus() (models.MatchmakingStatus, error) {
 	return a.svc.GetMatchmakingStatus(a.ctx)
 }
 
+// GetMatchAssignment 查询玩家当前的成局路由分配（仅 OPS，只读）
+func (a *App) GetMatchAssignment(uuid string) (models.MatchAssignment, error) {
+	if a.svc == nil {
+		return models.MatchAssignment{}, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetAssignment(a.ctx, uuid)
+}
+
 // GetMetrics 获取服务端指标快照（仅 OPS：计数器 + 按模式队列深度）
 func (a *App) GetMetrics() (models.MetricsSnapshot, error) {
 	if a.svc == nil {

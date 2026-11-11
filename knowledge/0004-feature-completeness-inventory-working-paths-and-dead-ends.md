@@ -26,6 +26,9 @@ Working paths:
   (entry 0008).
 - Matchmaking — join/leave/status against the live matchmaking endpoints as
   the service-token identity (entry 0008).
+- Assignment Inspector — read-only lookup of a Minecraft UUID's current
+  formed-group routing assignment through the OPS assignment endpoint
+  (entry 0010).
 - Rankings & History — read-only Top-N rankings and per-player history
   (history via maintenance SQL; entry 0008).
 - Rating Simulator — fully local computation, always available (entry 0003).
@@ -34,8 +37,6 @@ Working paths:
 
 Dead or broken paths:
 
-- Redis Browser — the UI is intact (search, view, delete), but the backend
-  returns "direct redis access is disabled" unconditionally.
 - Match Manager upload — the user-update statement and the follow-up
   `INSERT INTO matches` both execute against the MatchCoreArena-Server
   baseline schema; entry 0007 records the INSERT's column choices and their
@@ -46,23 +47,24 @@ Dead or broken paths:
   search.
 
 ## Consequences
-- Operators must know the Redis page is decorative; the reliable numbers are
-  Total Users, the user table itself, and the metrics-backed dashboard cards
-  (In Queue / Matches Reported), which degrade to "—" when metrics fail rather
-  than claiming zero.
+- There is no direct Redis surface: the page and its bindings are gone, and
+  all data operations tunnel through the maintenance SQL endpoint (entry
+  0002). The reliable numbers are Total Users, the user table itself, and the
+  metrics-backed dashboard cards (In Queue / Matches Reported), which degrade
+  to "—" when metrics fail rather than claiming zero.
 - Manual match-result upload executes against the real schema (entry 0007);
   manual score correction through User Management remains the simpler
   fallback for fixing ratings.
 - Costs and limitations:
-  - The UI promises more than the backend delivers; nothing in the UI marks
-    the dead surfaces as disabled.
-  - This repo contains no tests at all (no `*_test.go`, no frontend tests),
-    so schema drift is caught only at runtime.
+  - The UI still promises more than the backend delivers; nothing in the UI
+    marks the remaining dead surfaces as disabled.
+  - Go unit tests cover the maintenance SQL and MCA proxy layers
+    (`internal/logic/*_test.go`, httptest-based); the frontend has no tests,
+    so UI regressions are caught only by type-checking and the build.
   - Dashboard metric cards depend on a reachable upstream and an OPS-level
     token; without them the operator sees "—" plus a one-line hint, not data.
 
 ## Evidence
-- (removed) former internal/logic/maintenance.go GetRedisKeys / DeleteRedisKey — hard-disabled first, then deleted entirely
 - internal/logic/maintenance.go::GetUsers — GetUsers with hard-coded LIMIT 100
 - internal/logic/maintenance.go::GetSystemStats — Total Users count via maintenance SQL (Active Matches / Redis Keys are no longer surfaced)
 - internal/logic/mca.go::GetMetrics — OPS metrics proxy (`GET /api/metrics`) returning `MetricsSnapshot{counters, queue_depth}`
@@ -71,7 +73,8 @@ Dead or broken paths:
 - frontend/src/i18n/index.ts::dashboard.metricsUnavailable — hint shown when metrics cannot be loaded
 - internal/logic/maintenance.go::UploadMatchResult — UploadMatchResult aligned with the baseline matches schema (entry 0007)
 - internal/models/models.go::MatchResult — MatchResult carries MatchID/Rank/SurvivorCount that the backend never uses
-- (removed) former frontend/src/components/RedisBrowser.tsx — deleted together with the backend Redis methods; no Redis UI remains
+- internal/logic/mca_test.go::TestGetAssignment_AssignedTrue — unit coverage of the MCA proxy layer
+- internal/logic/maintenance_test.go::TestGetUsers_OK — unit coverage of the maintenance SQL layer
 - frontend/src/components/MatchManager.tsx::match_id — form fields and submit path
 - /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/migrate/migrations/baseline.sql::matches — matches schema: no `score_delta` column; `winner_uid`/`loser_uid` NOT NULL DEFAULT 0; `started_at`/`finished_at` NOT NULL without defaults
 - /home/lnb/Desktop/HA/matchcore/MatchCoreArena-Server/migrate/migrations/baseline.sql::users — users schema (columns referenced by GetUsers do exist)

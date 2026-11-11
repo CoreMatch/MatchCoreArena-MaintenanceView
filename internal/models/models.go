@@ -221,6 +221,21 @@ type QueueStats struct {
 	AverageWaitSeconds int64 `json:"average_wait_seconds"`
 }
 
+// MatchAssignment 玩家当前持有的成局路由分配
+// （GET /api/matchmaking/assignment/{uuid}，仅 OPS，契约 v1.9.0 起；
+// v1.10.0 增加 room 与 reason=no_room_available）。
+// assigned=false 时除 reason 外其余字段由服务端省略。
+type MatchAssignment struct {
+	Assigned   bool        `json:"assigned"`
+	Reason     string      `json:"reason,omitempty"`
+	GroupID    int64       `json:"group_id,omitempty"`
+	MatchType  string      `json:"match_type,omitempty"`
+	FormedAt   string      `json:"formed_at,omitempty"`
+	TeamID     string      `json:"team_id,omitempty"`
+	Room       string      `json:"room,omitempty"`
+	JoinTarget *JoinTarget `json:"join_target,omitempty"`
+}
+
 // MatchmakingStatus 当前令牌身份在匹配系统中的状态。
 type MatchmakingStatus struct {
 	InQueue      bool          `json:"in_queue"`

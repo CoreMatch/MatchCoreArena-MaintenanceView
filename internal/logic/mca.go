@@ -406,6 +406,32 @@ func (s *MaintenanceService) GetMatchmakingStatus(ctx context.Context) (models.M
 	return status, nil
 }
 
+// GetAssignment 查询玩家当前的成局路由分配
+// （GET /api/matchmaking/assignment/{uuid}，仅 OPS，契约 v1.9.0 起）。
+// assigned=true 时返回 group_id/match_type/formed_at/team_id，以及服务端
+// 配置了游戏服地址时的 join_target 和房间清单下的 room；assigned=false 时
+// 只有 assigned（以及有效成局但无房间可用的 reason=no_room_available）。
+// 未知 UUID 由服务端按“无分配”返回 200，不会 404。
+func (s *MaintenanceService) GetAssignment(ctx context.Context, uuid string) (models.MatchAssignment, error) {
+	var empty models.MatchAssignment
+	trimmed := strings.TrimSpace(uuid)
+	if trimmed == "" {
+		return empty, fmt.Errorf("uuid must not be empty")
+	}
+
+	path := "/api/matchmaking/assignment/" + url.PathEscape(trimmed)
+	data, err := s.doMCARequest(ctx, http.MethodGet, path, nil, s.serviceToken())
+	if err != nil {
+		return empty, err
+	}
+
+	var assignment models.MatchAssignment
+	if err := json.Unmarshal(data, &assignment); err != nil {
+		return empty, fmt.Errorf("failed to parse match assignment: %w", err)
+	}
+	return assignment, nil
+}
+
 // ─── 服务端指标（只读，仅 OPS）───
 
 // GetMetrics 获取服务端进程内指标快照（GET /api/metrics，仅 OPS）：

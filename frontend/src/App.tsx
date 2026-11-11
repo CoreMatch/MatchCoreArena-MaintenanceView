@@ -23,7 +23,8 @@ import {
   BugReport,
   Groups,
   EmojiEvents,
-  ViewList
+  ViewList,
+  AltRoute
 } from '@mui/icons-material';
 
 import { t } from './i18n';
@@ -35,6 +36,7 @@ import ConfigManager from './components/ConfigManager';
 import MatchReporter from './components/MatchReporter';
 import MatchBrowser from './components/MatchBrowser';
 import MatchmakingPanel from './components/MatchmakingPanel';
+import AssignmentInspector from './components/AssignmentInspector';
 import RankingsView from './components/RankingsView';
 
 const drawerWidth = 240;
@@ -62,6 +64,7 @@ export default function App() {
     { id: 'reporter', label: t().nav.reporter, icon: <BugReport /> },
     { id: 'browser', label: t().nav.browser, icon: <ViewList /> },
     { id: 'matchmaking', label: t().nav.matchmaking, icon: <Groups /> },
+    { id: 'assignment', label: t().nav.assignment, icon: <AltRoute /> },
     { id: 'rankings', label: t().nav.rankings, icon: <EmojiEvents /> },
     { id: 'rating', label: t().nav.rating, icon: <Calculate /> },
     { id: 'config', label: t().nav.config, icon: <Settings /> },
@@ -79,6 +82,8 @@ export default function App() {
         return <MatchBrowser />;
       case 'matchmaking':
         return <MatchmakingPanel />;
+      case 'assignment':
+        return <AssignmentInspector />;
       case 'rankings':
         return <RankingsView />;
       case 'rating':
