@@ -398,7 +398,7 @@ func TestGetMatchmakingStatus_OK(t *testing.T) {
 			"in_queue":      true,
 			"queue_entry":   map[string]any{"uid": 123, "match_type": "1v1", "rank_score": 1500, "enqueued_at": "t0"},
 			"recent_groups": []map[string]any{
-				{"group_id": 1, "match_type": "1v1", "formed_at": "t1", "members": []any{map[string]any{"uid": 123}}},
+				{"group_id": 1, "match_type": "1v1", "formed_at": "t1", "members": []any{map[string]any{"uid": 123}}, "room": "bw-room-1"},
 			},
 		}))
 	}
@@ -415,6 +415,9 @@ func TestGetMatchmakingStatus_OK(t *testing.T) {
 	}
 	if len(st.RecentGroups) != 1 {
 		t.Errorf("expected 1 recent group, got %d", len(st.RecentGroups))
+	}
+	if st.RecentGroups[0].Room != "bw-room-1" {
+		t.Errorf("expected room bw-room-1, got %q", st.RecentGroups[0].Room)
 	}
 }
 

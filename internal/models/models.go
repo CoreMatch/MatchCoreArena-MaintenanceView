@@ -209,6 +209,8 @@ type FormedGroup struct {
 	FormedAt   string        `json:"formed_at"`
 	Members    []GroupMember `json:"members"`
 	JoinTarget *JoinTarget   `json:"join_target,omitempty"`
+	// Room 预占房间名（契约 1.10.0 房间层）；服务端未启用房间清单时省略该字段。
+	Room string `json:"room,omitempty"`
 }
 
 // QueueStats 队列规模统计（只读展示用）。旧服务端不返回该字段，

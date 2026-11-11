@@ -189,6 +189,7 @@ const en = {
     avgWait: 'Avg wait',
     queueStatsUnavailable: 'Queue stats unavailable (older server build)',
     joinTarget: 'Join target',
+    room: 'Room',
     autoRefresh: 'Auto-refreshing every 5s',
     partyTitle: 'Party (optional)',
     partyNote:

@@ -59,7 +59,9 @@ already tunnels data operations through the upstream maintenance endpoint
     parties · Avg wait ~m:ss`) and falls back to an "older server build"
     note when the field is absent. Each formed group shows its optional
     `join_target` as `host:port`, or an em dash when the server omits it
-    (unconfigured game-server address).
+    (unconfigured game-server address); the reserved `room` (contract 1.10.0
+    room layer) is shown alongside, with an em dash when the server has no
+    room inventory enabled.
   - Match Browser — OPS-only read-only queries added with contract v1.5.0:
     the global match list (`GET /api/matches`) with pagination and filters
     (source, map_name, exact game_id, participant uid, finished_at range),
@@ -124,6 +126,7 @@ already tunnels data operations through the upstream maintenance endpoint
 - internal/logic/mca.go::GetMetrics — OPS metrics snapshot proxy (counters + queue depth)
 - internal/models/models.go::QueueStats — `queue_stats` shape from `GET /api/matchmaking/status`
 - internal/models/models.go::JoinTarget — optional `join_target` on formed groups
+- internal/models/models.go::FormedGroup — formed-group record incl. optional `room`
 - internal/models/models.go::MetricsSnapshot — `{counters, queue_depth}` response shape
 - internal/models/models.go::TeamReportInput — `source` and `matchmaking_group_id` report fields
 - internal/models/models.go::MCAConfig — `mca.reporter_token` config field
