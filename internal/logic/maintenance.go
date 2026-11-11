@@ -64,6 +64,9 @@ func NewMaintenanceService(cfg *models.Config) *MaintenanceService {
 
 // doRequest 发送经过身份验证的 HTTP 请求
 func (s *MaintenanceService) doRequest(ctx context.Context, method, path string, body interface{}) ([]byte, error) {
+	if s.cfg == nil || strings.TrimSpace(s.cfg.UpstreamURL) == "" {
+		return nil, fmt.Errorf("upstream_url is not configured; cannot call maintenance endpoint")
+	}
 	url := strings.TrimSuffix(s.cfg.UpstreamURL, "/") + path
 	var bodyReader io.Reader
 	if body != nil {
