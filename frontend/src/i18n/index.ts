@@ -22,6 +22,7 @@ const en = {
     reporter: 'Match Reporter',
     browser: 'Match Browser',
     matchmaking: 'Matchmaking',
+    assignment: 'Assignment Inspector',
     rankings: 'Rankings & History',
     rating: 'Rating Simulator',
     config: 'Config Manager',
@@ -199,6 +200,31 @@ const en = {
     partySize: 'Party size',
     partyQueueAs: 'Queue as party',
     partyInvalidUuid: 'Invalid player UUID.',
+  },
+
+  // ── Assignment Inspector ──
+  assignment: {
+    title: 'Assignment Inspector',
+    intro:
+      'Read-only debug view: resolves a Minecraft UUID to its current formed-group routing assignment. Data comes from the OPS-only assignment endpoint through the backend proxy, so credentials never reach the UI. Virtual (ops-fed) and real matches share the same matchmaking endpoints; this page only observes routing state.',
+    uuid: 'Minecraft UUID',
+    lookup: 'Inspect',
+    lookingUp: 'Inspecting...',
+    emptyInput: 'Enter a Minecraft UUID to inspect.',
+    assigned: 'Assigned',
+    notAssigned: 'Not assigned',
+    noAssignment:
+      'This player currently holds no routing assignment: the UUID is unknown, no formed group exists, or the most recent group was already settled or expired.',
+    noRoomAvailable:
+      'A valid formed group exists, but no room can be served right now: the room reservation expired or the room inventory no longer offers one. The player is not routed to a game server.',
+    reason: 'Reason',
+    groupId: 'Group ID',
+    matchType: 'Match type',
+    formedAt: 'Formed at',
+    teamId: 'Team',
+    room: 'Room',
+    joinTarget: 'Join target',
+    readOnlyNote: 'Read-only view. This page never changes matchmaking state.',
   },
 
   // ── OPS identity ──

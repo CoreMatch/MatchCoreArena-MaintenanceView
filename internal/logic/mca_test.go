@@ -421,6 +421,115 @@ func TestGetMatchmakingStatus_OK(t *testing.T) {
 	}
 }
 
+// ─── GetAssignment ───
+
+func TestGetAssignment_AssignedTrue(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/api/matchmaking/assignment/069a79f4-44e9-4726-a5be-fca90e38aaf5" {
+			t.Errorf("unexpected call: %s %s", r.Method, r.URL.Path)
+		}
+		if auth := r.Header.Get("Authorization"); auth != "Bearer reporter-xyz" {
+			t.Errorf("expected Bearer service token, got %q", auth)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(envel(map[string]any{
+			"assigned":   true,
+			"group_id":   42,
+			"match_type": "1v1",
+			"formed_at":  "2024-01-01T00:00:00Z",
+			"team_id":    "A",
+			"room":       "arena-3",
+			"join_target": map[string]any{
+				"host": "game1.example.com",
+				"port": 25566,
+			},
+		}))
+	}
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	s := &MaintenanceService{
+		cfg:        &models.Config{UpstreamURL: ts.URL, MCA: models.MCAConfig{ReporterToken: "reporter-xyz"}},
+		httpClient: &http.Client{},
+	}
+	a, err := s.GetAssignment(context.Background(), " 069a79f4-44e9-4726-a5be-fca90e38aaf5 ")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !a.Assigned || a.GroupID != 42 || a.MatchType != "1v1" || a.TeamID != "A" || a.Room != "arena-3" {
+		t.Errorf("assignment mismatch: %+v", a)
+	}
+	if a.JoinTarget == nil || a.JoinTarget.Host != "game1.example.com" || a.JoinTarget.Port != 25566 {
+		t.Errorf("join_target mismatch: %+v", a.JoinTarget)
+	}
+	if a.Reason != "" {
+		t.Errorf("expected empty reason when assigned, got %q", a.Reason)
+	}
+}
+
+func TestGetAssignment_NotAssignedNoRoom(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(envel(map[string]any{
+			"assigned": false,
+			"reason":   "no_room_available",
+		}))
+	}
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	s := newTestService(t, ts.URL)
+	a, err := s.GetAssignment(context.Background(), "069a79f444e94726a5befca90e38aaf5")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if a.Assigned {
+		t.Error("expected assigned=false")
+	}
+	if a.Reason != "no_room_available" {
+		t.Errorf("expected reason no_room_available, got %q", a.Reason)
+	}
+	if a.JoinTarget != nil || a.Room != "" || a.GroupID != 0 {
+		t.Errorf("expected omitted assignment fields, got %+v", a)
+	}
+}
+
+func TestGetAssignment_EmptyUUID(t *testing.T) {
+	called := false
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+	}))
+	defer ts.Close()
+
+	s := newTestService(t, ts.URL)
+	_, err := s.GetAssignment(context.Background(), "   ")
+	if err == nil || !strings.Contains(err.Error(), "uuid") {
+		t.Errorf("expected uuid validation error, got: %v", err)
+	}
+	if called {
+		t.Error("empty uuid must not reach the upstream")
+	}
+}
+
+func TestGetAssignment_UpstreamErrorPropagated(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadGateway)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(envelErr(502, "oauth_hrpauth_down", "hrpauth unreachable"))
+	}
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	s := newTestService(t, ts.URL)
+	_, err := s.GetAssignment(context.Background(), "069a79f4-44e9-4726-a5be-fca90e38aaf5")
+	if err == nil {
+		t.Fatal("expected upstream error, got nil")
+	}
+	if !strings.Contains(err.Error(), "HRPAuth upstream unavailable") || !strings.Contains(err.Error(), "oauth_hrpauth_down") {
+		t.Errorf("expected translated HRPAuth error with code, got: %v", err)
+	}
+}
+
 // ─── GetMatchRejections ───
 
 func TestGetMatchRejections_ParseOK(t *testing.T) {

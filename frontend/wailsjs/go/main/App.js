@@ -10,6 +10,10 @@ export function GetConfigHistory() {
   return window['go']['main']['App']['GetConfigHistory']();
 }
 
+export function GetMatchAssignment(arg1) {
+  return window['go']['main']['App']['GetMatchAssignment'](arg1);
+}
+
 export function GetMatchByGameID(arg1) {
   return window['go']['main']['App']['GetMatchByGameID'](arg1);
 }
