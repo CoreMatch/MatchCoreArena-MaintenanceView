@@ -41,7 +41,7 @@ type mcaSuccessEnvelope struct {
 // mcaErrorCodeMessages 类型化错误码到可读提示（英文）的映射。
 // 未列出的错误码回落到信封自带 message。
 var mcaErrorCodeMessages = map[string]string{
-	"mca_not_implemented":      "This feature is not implemented on the server yet (friend/team endpoints answer 501)",
+	"mca_not_implemented":      "This feature is not implemented on the server yet",
 	"mca_user_not_found":       "Participant Minecraft UUID is unknown to HRPAuth; identity cannot be resolved",
 	"mca_user_not_provisioned": "Participant account cannot be provisioned locally (UID held by a soft-deleted row); the whole match was rolled back",
 	"mca_invalid_request":      "Invalid request parameters (check team/member structure and timestamp format)",
