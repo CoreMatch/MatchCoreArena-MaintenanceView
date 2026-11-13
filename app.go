@@ -204,6 +204,25 @@ func (a *App) GetOpsIdentity() models.OpsIdentity {
 	return a.svc.GetOpsIdentity()
 }
 
+// ─── Seasons（契约 1.12.0：手动更季，OPS-only）───
+
+// GetSeasons 获取全部赛季记录（新到旧，首条即当前赛季）。
+func (a *App) GetSeasons() ([]models.SeasonRecord, error) {
+	if a.svc == nil {
+		return nil, fmt.Errorf("service not initialized")
+	}
+	return a.svc.GetSeasons(a.ctx)
+}
+
+// RollSeason 手动触发更季（OPS-only）。target_season 必须为当前赛季 +1；
+// reset_scores 决定是否全部重置 rank_score（默认 false）。
+func (a *App) RollSeason(input models.RollSeasonInput) (models.SeasonRecord, error) {
+	if a.svc == nil {
+		return models.SeasonRecord{}, fmt.Errorf("service not initialized")
+	}
+	return a.svc.RollSeason(a.ctx, input)
+}
+
 // SaveConfig 保存配置
 func (a *App) SaveConfig(cfg models.Config) error {
 	if a.svc == nil {

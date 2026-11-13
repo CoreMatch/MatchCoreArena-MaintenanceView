@@ -303,3 +303,23 @@ type OpsIdentity struct {
 	UsingFallback      bool   `json:"using_fallback"`      // 实际回落到 management_token
 	UpstreamURL        string `json:"upstream_url"`        // 当前上游地址
 }
+
+// ─── Seasons（契约 1.12.0：手动更季，无自动更季）───
+
+// SeasonRecord 赛季簿记记录（GET /api/seasons，新到旧，首条为当前赛季）。
+type SeasonRecord struct {
+	Season      int    `json:"season"`
+	ResetScores bool   `json:"reset_scores"`
+	OpenedAt    string `json:"opened_at"`
+	OpenedBy    string `json:"opened_by"`
+	Note        string `json:"note,omitempty"`
+}
+
+// RollSeasonInput POST /api/seasons/roll 的请求体（OPS-only，手动更季）。
+// TargetSeason 必须为当前赛季 +1；ResetScores 是否重置全部 rank_score（默认 false）；
+// Note 可选备注，≤200 字符。
+type RollSeasonInput struct {
+	TargetSeason int    `json:"target_season"`
+	ResetScores  bool   `json:"reset_scores"`
+	Note         string `json:"note"`
+}

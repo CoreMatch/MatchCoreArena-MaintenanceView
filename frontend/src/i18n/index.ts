@@ -23,6 +23,7 @@ const en = {
     browser: 'Match Browser',
     matchmaking: 'Matchmaking',
     assignment: 'Assignment Inspector',
+    seasons: 'Seasons',
     rankings: 'Rankings & History',
     rating: 'Rating Simulator',
     config: 'Config Manager',
@@ -295,6 +296,32 @@ const en = {
     value: 'Value',
     mode: 'Mode',
     depth: 'Depth',
+  },
+
+  // ── Seasons ──
+  seasons: {
+    title: 'Seasons',
+    intro:
+      'Manual OPS-only rollover (contract 1.12.0). No automatic rollover is ever scheduled — seasons change only when an operator triggers it here. Rankings default to the current season; old seasons remain queryable forever.',
+    listTitle: 'Season history',
+    load: 'Load seasons',
+    loading: 'Loading...',
+    empty: 'No season records yet (the server should seed season 1).',
+    currentSeason: 'Current',
+    resetScores: 'Scores reset',
+    openedAt: 'Opened at',
+    openedBy: 'Opened by',
+    note: 'Note',
+    rollTitle: 'Open next season',
+    rollIntro:
+      'Rollover is strictly one season at a time — target_season must equal the current season + 1. Repeat or skip are rejected (typed 409 mca_season_exists). Reset scores clears every non-deleted user\u2019s rank_score to 0; wins_count and match history are untouched (K-factor phase and streaks continue across rollovers).',
+    targetSeason: 'target_season',
+    resetScoresLabel: 'Reset all rank_score to 0',
+    noteLabel: 'Note (optional, ≤200 chars)',
+    submit: 'Open next season',
+    submitting: 'Rolling...',
+    success: 'Opened season',
+    failed: 'Failed to open season',
   },
 
   // ── Rankings & History ──

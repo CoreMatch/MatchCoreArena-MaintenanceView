@@ -20,6 +20,10 @@ export function GetMetrics():Promise<models.MetricsSnapshot>;
 
 export function GetOpsIdentity():Promise<models.OpsIdentity>;
 
+export function GetSeasons():Promise<Array<models.SeasonRecord>>;
+
+export function RollSeason(arg1:models.RollSeasonInput):Promise<models.SeasonRecord>;
+
 export function GetPlayerHistory(arg1:number,arg2:number):Promise<Array<models.PlayerMatchRow>>;
 
 export function GetRequestLog():Promise<Array<models.RequestLogEntry>>;

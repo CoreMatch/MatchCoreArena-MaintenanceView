@@ -50,6 +50,7 @@ var mcaErrorCodeMessages = map[string]string{
 	"mca_game_id_conflict":     "game_id was already recorded with a different payload (idempotency conflict)",
 	"mca_queue_already_joined": "This identity is already in the matchmaking queue (one entry per identity)",
 	"mca_queue_not_joined":     "This identity is not in the matchmaking queue",
+	"mca_season_exists":        "Target season already exists — rollover is one-season-at-a-time and cannot be repeated or rewound",
 	"oauth_insufficient_scope": "Reporting requires an OPS token with the match:report scope.",
 	"oauth_hrpauth_down":       "HRPAuth upstream unavailable (service credentials or upstream outage); retry later",
 	"oauth_token_expired":      "Access token expired",
@@ -585,6 +586,61 @@ func (s *MaintenanceService) GetUpstreamStatus(ctx context.Context) models.Upstr
 	}
 	_ = json.Unmarshal(envelope.Data, &payload)
 	return models.UpstreamStatus{Reachable: true, Version: payload.Version, Message: envelope.Message}
+}
+
+// ─── Seasons（契约 1.12.0：手动更季，OPS-only）───
+
+// GetSeasons 返回全部赛季记录（GET /api/seasons，新到旧，首条为当前赛季）。
+func (s *MaintenanceService) GetSeasons(ctx context.Context) ([]models.SeasonRecord, error) {
+	data, err := s.doMCARequest(ctx, http.MethodGet, "/api/seasons", nil, s.serviceToken())
+	if err != nil {
+		return nil, err
+	}
+	if string(data) == "null" || len(data) == 0 {
+		return []models.SeasonRecord{}, nil
+	}
+
+	var seasons []models.SeasonRecord
+	if err := json.Unmarshal(data, &seasons); err != nil {
+		return nil, fmt.Errorf("failed to parse seasons: %w", err)
+	}
+	if seasons == nil {
+		seasons = []models.SeasonRecord{}
+	}
+	return seasons, nil
+}
+
+// RollSeason 手动更季（POST /api/seasons/roll，仅 OPS）。
+// targetSeason 必须为当前赛季 +1；resetScores 决定是否全部重置 rank_score（默认 false）；
+// note 可选 ≤200 字符备注。返回新赛季记录。
+func (s *MaintenanceService) RollSeason(ctx context.Context, input models.RollSeasonInput) (models.SeasonRecord, error) {
+	var empty models.SeasonRecord
+
+	if input.TargetSeason <= 0 {
+		return empty, fmt.Errorf("target_season must be a positive integer")
+	}
+	if len(input.Note) > 200 {
+		return empty, fmt.Errorf("note must not exceed 200 characters (got %d)", len(input.Note))
+	}
+
+	body := map[string]interface{}{
+		"target_season": input.TargetSeason,
+		"reset_scores":  input.ResetScores,
+	}
+	if strings.TrimSpace(input.Note) != "" {
+		body["note"] = strings.TrimSpace(input.Note)
+	}
+
+	data, err := s.doMCARequest(ctx, http.MethodPost, "/api/seasons/roll", body, s.serviceToken())
+	if err != nil {
+		return empty, err
+	}
+
+	var rec models.SeasonRecord
+	if err := json.Unmarshal(data, &rec); err != nil {
+		return empty, fmt.Errorf("failed to parse season record: %w", err)
+	}
+	return rec, nil
 }
 
 // rawFloat 从运维 SQL 的行 map 里安全取数字。

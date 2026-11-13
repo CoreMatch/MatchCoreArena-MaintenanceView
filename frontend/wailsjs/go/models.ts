@@ -769,6 +769,42 @@ export namespace models {
 	        this.message = source["message"];
 	    }
 	}
+	export class SeasonRecord {
+	    season: number;
+	    reset_scores: boolean;
+	    opened_at: string;
+	    opened_by: string;
+	    note?: string;
+
+	    static createFrom(source: any = {}) {
+	        return new SeasonRecord(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.season = source["season"];
+	        this.reset_scores = source["reset_scores"];
+	        this.opened_at = source["opened_at"];
+	        this.opened_by = source["opened_by"];
+	        this.note = source["note"];
+	    }
+	}
+	export class RollSeasonInput {
+	    target_season: number;
+	    reset_scores: boolean;
+	    note: string;
+
+	    static createFrom(source: any = {}) {
+	        return new RollSeasonInput(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.target_season = source["target_season"];
+	        this.reset_scores = source["reset_scores"];
+	        this.note = source["note"];
+	    }
+	}
 	export class User {
 	    uid: number;
 	    level: number;
