@@ -46,6 +46,10 @@ export function GetRequestLog() {
   return window['go']['main']['App']['GetRequestLog']();
 }
 
+export function GetSeasons() {
+  return window['go']['main']['App']['GetSeasons']();
+}
+
 export function GetSystemStats() {
   return window['go']['main']['App']['GetSystemStats']();
 }
@@ -76,6 +80,10 @@ export function ListMatches(arg1) {
 
 export function ReportMatch(arg1) {
   return window['go']['main']['App']['ReportMatch'](arg1);
+}
+
+export function RollSeason(arg1) {
+  return window['go']['main']['App']['RollSeason'](arg1);
 }
 
 export function RestoreConfig(arg1) {
